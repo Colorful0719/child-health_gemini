@@ -1,3 +1,9 @@
+// --- Google 表單串接設定區 (已根據你的表單更新) ---
+const FORM_ID = "1FAIpQLScXP8f1JzFq-kFYnZiLsGDUXQSQDUcE0OieeOMg4Lr6YvZzgA"; 
+const ENTRY_ID_NAME = "entry.111555726"; // 填答者資訊
+const ENTRY_ID_DATA = "entry.2065308468"; // 作答資料內容
+// ----------------------------------------------
+
 const questions = [
   ["h1", "衛生", "吃完飯後，我會...?探討刷牙習慣", "飯後刷牙", "吃完直接玩玩具", "a", 1, 2, ["b", "a"]],
   ["h2", "衛生", "睡覺前，我會...?探討清潔習慣", "洗澡", "髒髒的去睡覺", "a", 3, 4, ["a", "b"]],
@@ -5,6 +11,7 @@ const questions = [
   ["h4", "衛生", "打噴嚏的時候，我會…?探討衛生習慣", "衛生紙遮口鼻", "直接對著別人", "a", 7, 8, ["a", "b"]],
   ["h5", "衛生", "吃飯的時候，我會用….?探討餐具使用", "乾淨餐具組", "髒髒餐具", "a", 9, 10, ["b", "a"]],
   ["h6", "衛生", "我會讓我的指甲保持…?探討修剪習慣", "剪齊短指甲", "微灰灰指甲", "a", 11, 12, ["a", "b"]]
+  // 剩餘題目可依此格式繼續補齊...
 ];
 
 const state = {
@@ -15,19 +22,12 @@ const state = {
   startedAt: null
 };
 
-// --- Google 表單設定區 (請替換為你的 ID) ---
-const FORM_ID = "YOUR_GOOGLE_FORM_ID"; 
-const ENTRY_ID_NAME = "entry.12345678"; 
-const ENTRY_ID_DATA = "entry.87654321"; 
-// ---------------------------------------
-
 const els = {
   welcomeView: document.getElementById("welcomeView"),
   quizView: document.getElementById("quizView"),
   doneView: document.getElementById("doneView"),
   displayName: document.getElementById("displayName"),
   startButton: document.getElementById("startButton"),
-  openAdminButton: document.getElementById("openAdminButton"),
   categoryLabel: document.getElementById("categoryLabel"),
   questionPrompt: document.getElementById("questionPrompt"),
   optionA: document.getElementById("optionA"),
@@ -101,9 +101,11 @@ async function finish() {
   formData.append(ENTRY_ID_DATA, JSON.stringify(result.answers));
 
   try {
+    // 模擬表單提交
     await fetch(formUrl, { method: "POST", mode: "no-cors", body: formData });
+    console.log("資料同步成功");
   } catch (e) {
-    console.error("Sync failed", e);
+    console.error("同步失敗", e);
   }
 }
 
@@ -120,5 +122,6 @@ function show(el) {
 }
 
 els.startButton.addEventListener("click", start);
-els.restartButton.addEventListener("click", () => show(els.welcomeView));
-els.openAdminButton.addEventListener("click", () => alert("此版本已改用 Google 表單儲存。"));
+els.restartButton.addEventListener("click", () => {
+  window.location.reload(); // 點擊重新開始時重整頁面
+});
