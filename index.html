@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>幼兒健康圖像式問卷</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="welcome-view" id="welcomeView" aria-labelledby="appTitle">
+        <div class="brand-row">
+          <div class="mark" aria-hidden="true">✓</div>
+          <div>
+            <p class="eyebrow">幼兒健康圖像式問卷</p>
+            <h1 id="appTitle" class="sr-only">幼兒健康圖像式問卷</h1>
+          </div>
+        </div>
+        <div class="start-panel">
+          <label for="displayName">填答者名稱或班級</label>
+          <input id="displayName" type="text" autocomplete="off" placeholder="可留空，系統會自動編號">
+          <div class="welcome-actions">
+            <button class="primary-action" id="startButton" type="button">開始</button>
+            <button class="secondary-action" id="openAdminButton" type="button">後台說明</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="quiz-view hidden" id="quizView" aria-live="polite">
+        <header class="quiz-header">
+          <div>
+            <p class="eyebrow" id="categoryLabel"></p>
+            <h2 id="questionPrompt"></h2>
+          </div>
+        </header>
+        <div class="quiz-options">
+          <button class="option-card" id="optionA" type="button">
+            <img id="imageA" src="" alt="">
+            <span id="labelA"></span>
+          </button>
+          <button class="option-card" id="optionB" type="button">
+            <img id="imageB" src="" alt="">
+            <span id="labelB"></span>
+          </button>
+        </div>
+        <footer class="quiz-footer">
+          <button class="utility-button" id="replayButton" type="button">再聽一次</button>
+          <button class="utility-button" id="unknownButton" type="button">我不知道</button>
+        </footer>
+      </section>
+
+      <section class="done-view hidden" id="doneView">
+        <div class="done-content">
+          <div class="mark large">★</div>
+          <h2>太棒了！</h2>
+          <p>你已經完成所有的題目囉！</p>
+          <button class="primary-action" id="restartButton" type="button">重新開始</button>
+        </div>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
