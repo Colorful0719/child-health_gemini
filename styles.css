@@ -1,33 +1,144 @@
-<section id="quizView" class="quiz-view hidden">
-    <header class="quiz-header">
-        <div>
-            <p id="categoryLabel" class="eyebrow"></p>
-            <h2 id="questionPrompt"></h2>
-        </div>
-        <button class="replay-btn" id="replayButton">🔊 重聽題目</button>
-    </header>
+:root {
+  --ink: #24313d;
+  --muted: #66727d;
+  --line: #d8e1e8;
+  --paper: #fffdf7;
+  --blue: #dcebf7;
+  --coral: #f8d7cf;
+  --green: #2c7a5b;
+  --focus: #1d6fb8;
+  font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+}
 
-    <div class="options-grid">
-        <div class="picture-option" id="optionA">
-            <div class="image-frame">
-                <img id="imageA" src="" alt="">
-            </div>
-            <div class="option-caption">
-                <span id="labelA" class="option-label"></span>
-                <button class="option-audio" id="audioA">▶</button>
-            </div>
-        </div>
+body {
+  margin: 0;
+  background: linear-gradient(135deg, #e9f5f0, #e4edf5);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
 
-        <div class="picture-option" id="optionB">
-            <div class="image-frame">
-                <img id="imageB" src="" alt="">
-            </div>
-            <div class="option-caption">
-                <span id="labelB" class="option-label"></span>
-                <button class="option-audio" id="audioB">▶</button>
-            </div>
-        </div>
-    </div>
+.app-shell {
+  width: min(1120px, 100% - 32px);
+  padding: 20px 0;
+}
 
-    <button class="unknown-button" id="unknownButton">不知道</button>
-</section>
+.hidden { display: none !important; }
+
+/* 容器樣式：如你提供的範例圖 */
+.quiz-view {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+  border: 1px solid var(--line);
+}
+
+.quiz-header {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.eyebrow { color: var(--green); font-weight: 800; font-size: 1rem; margin-bottom: 5px; }
+h2 { font-size: 2.5rem; margin: 0; color: var(--ink); }
+
+/* --- 核心：這一段保證圖片永遠並排 --- */
+.options-grid {
+  display: grid !important;
+  /* 強制鎖定為兩欄，不論螢幕多窄都不會換行 */
+  grid-template-columns: 1fr 1fr !important; 
+  gap: 20px;
+  width: 100%;
+  margin-top: 25px;
+}
+
+.picture-option {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 15px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.picture-option:hover { transform: translateY(-3px); }
+
+.image-frame {
+  width: 100%;
+  height: 40vh; /* 確保在平板橫向時圖片夠大 */
+  display: grid;
+  place-items: center;
+  background: #fdfdfd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.image-frame img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+}
+
+/* 選項下方的文字與播放鈕 */
+.option-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 15px;
+  padding: 0 10px;
+}
+
+.option-label {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.option-audio {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--focus);
+  color: white;
+  cursor: pointer;
+}
+
+/* --- 重聽按鈕：如範例圖置於左上方 --- */
+.replay-btn {
+  background: var(--blue);
+  border: 0;
+  border-radius: 50px;
+  padding: 10px 20px;
+  font-weight: bold;
+  font-size: 1rem;
+  color: var(--focus);
+  margin-top: 15px;
+  cursor: pointer;
+}
+
+/* --- 不知道按鈕：如第一張圖置於右下角 --- */
+.unknown-button {
+  position: fixed;
+  right: 25px;
+  bottom: 25px;
+  background: var(--coral);
+  border: 2px solid #eeb8ad;
+  padding: 15px 40px;
+  border-radius: 50px;
+  font-size: 1.5rem;
+  font-weight: 900;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+/* 移除所有會導致換行的媒體查詢設定 */
+@media (max-width: 720px) {
+  .options-grid {
+    grid-template-columns: 1fr 1fr !important; 
+  }
+  h2 { font-size: 1.8rem; }
+  .image-frame { height: 30vh; }
+}
