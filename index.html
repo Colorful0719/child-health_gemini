@@ -8,34 +8,56 @@
 </head>
 <body>
     <main class="app-shell">
-        <section id="welcomeView">
-            <h1>幼兒健康圖像式問卷</h1>
-            <input id="displayName" type="text" placeholder="請輸入班級或姓名">
-            <br><br>
-            <button class="primary-action" id="startButton">開始問卷</button>
+        <section id="welcomeView" class="welcome-view">
+            <div class="brand-row">
+                <div class="mark">K</div>
+                <h1>幼兒健康問卷</h1>
+            </div>
+            <div class="start-panel">
+                <label>班級或姓名</label>
+                <input id="displayName" type="text" placeholder="請輸入..." autocomplete="off">
+                <button class="primary-action" id="startButton">開始問卷</button>
+            </div>
         </section>
 
-        <section id="quizView" class="hidden">
+        <section id="quizView" class="quiz-view hidden">
             <header class="quiz-header">
-                <p id="categoryLabel"></p>
-                <h2 id="questionPrompt">載入中...</h2>
+                <div>
+                    <p id="categoryLabel" class="eyebrow"></p>
+                    <h2 id="questionPrompt">載入中...</h2>
+                </div>
                 <button class="replay-btn" id="replayButton" type="button">🔊 重聽題目</button>
             </header>
-            <div class="quiz-options">
-                <button class="option-card" id="optionA" type="button">
-                    <img id="imageA" src="" alt="">
-                    <div class="label-row"><span id="labelA"></span><button class="audio-btn" id="audioA" type="button">▶</button></div>
-                </button>
-                <button class="option-card" id="optionB" type="button">
-                    <img id="imageB" src="" alt="">
-                    <div class="label-row"><span id="labelB"></span><button class="audio-btn" id="audioB" type="button">▶</button></div>
-                </button>
+
+            <div class="options-grid">
+                <div class="picture-option" id="optionA">
+                    <div class="image-frame">
+                        <img id="imageA" src="" alt="">
+                    </div>
+                    <div class="option-caption">
+                        <span id="labelA" class="option-label"></span>
+                        <button class="option-audio" id="audioA">▶</button>
+                    </div>
+                </div>
+
+                <div class="picture-option" id="optionB">
+                    <div class="image-frame">
+                        <img id="imageB" src="" alt="">
+                    </div>
+                    <div class="option-caption">
+                        <span id="labelB" class="option-label"></span>
+                        <button class="option-audio" id="audioB">▶</button>
+                    </div>
+                </div>
             </div>
+
             <button class="unknown-button" id="unknownButton" type="button">不知道</button>
         </section>
 
-        <section id="doneView" class="hidden">
+        <section id="doneView" class="done-view hidden">
+            <div class="done-symbol">✓</div>
             <h2>完成作答！</h2>
+            <p>太棒了，你已經完成所有的題目囉！</p>
             <button class="primary-action" id="restartButton">重新開始</button>
         </section>
     </main>
