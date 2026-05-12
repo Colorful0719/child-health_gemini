@@ -8,54 +8,46 @@
   </head>
   <body>
     <main class="app-shell">
-      <section class="welcome-view" id="welcomeView" aria-labelledby="appTitle">
+      <section class="welcome-view" id="welcomeView">
         <div class="brand-row">
-          <div class="mark" aria-hidden="true">✓</div>
-          <div>
-            <p class="eyebrow">幼兒健康圖像式問卷</p>
-            <h1 id="appTitle" class="sr-only">幼兒健康圖像式問卷</h1>
-          </div>
+          <div class="mark">✓</div>
+          <p class="eyebrow">幼兒健康圖像式問卷</p>
         </div>
         <div class="start-panel">
           <label for="displayName">填答者名稱或班級</label>
-          <input id="displayName" type="text" autocomplete="off" placeholder="可留空，系統會自動編號">
-          <div class="welcome-actions">
-            <button class="primary-action" id="startButton" type="button">開始</button>
-            <button class="secondary-action" id="openAdminButton" type="button">後台說明</button>
-          </div>
+          <input id="displayName" type="text" autocomplete="off" placeholder="可留空">
+          <button class="primary-action" id="startButton">開始</button>
         </div>
       </section>
 
-      <section class="quiz-view hidden" id="quizView" aria-live="polite">
+      <section class="quiz-view hidden" id="quizView">
         <header class="quiz-header">
-          <div>
-            <p class="eyebrow" id="categoryLabel"></p>
-            <h2 id="questionPrompt"></h2>
-          </div>
+          <p class="eyebrow" id="categoryLabel"></p>
+          <h2 id="questionPrompt"></h2>
+          <button class="replay-btn" id="replayButton">🔊 重聽題目</button>
         </header>
         <div class="quiz-options">
-          <button class="option-card" id="optionA" type="button">
+          <button class="option-card" id="optionA">
             <img id="imageA" src="" alt="">
-            <span id="labelA"></span>
+            <div class="label-row">
+              <span id="labelA"></span>
+              <button class="audio-btn" id="audioA">▶</button>
+            </div>
           </button>
-          <button class="option-card" id="optionB" type="button">
+          <button class="option-card" id="optionB">
             <img id="imageB" src="" alt="">
-            <span id="labelB"></span>
+            <div class="label-row">
+              <span id="labelB"></span>
+              <button class="audio-btn" id="audioB">▶</button>
+            </div>
           </button>
         </div>
-        <footer class="quiz-footer">
-          <button class="utility-button" id="replayButton" type="button">再聽一次</button>
-          <button class="utility-button" id="unknownButton" type="button">我不知道</button>
-        </footer>
+        <button class="unknown-button" id="unknownButton">不知道</button>
       </section>
 
       <section class="done-view hidden" id="doneView">
-        <div class="done-content">
-          <div class="mark large">★</div>
-          <h2>太棒了！</h2>
-          <p>你已經完成所有的題目囉！</p>
-          <button class="primary-action" id="restartButton" type="button">重新開始</button>
-        </div>
+        <h2>完成作答！</h2>
+        <button class="primary-action" id="restartButton">重新開始</button>
       </section>
     </main>
     <script src="app.js"></script>
