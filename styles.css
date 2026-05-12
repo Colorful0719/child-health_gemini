@@ -1,12 +1,129 @@
-:root { --green: #2c7a5b; --line: #d8e1e8; }
-body { font-family: sans-serif; background: #fffdf7; margin: 0; }
-.app-shell { width: 95%; max-width: 1200px; margin: 0 auto; padding: 20px; text-align: center; }
+:root {
+  --green: #2c7a5b;
+  --line: #d8e1e8;
+  --bg: #fffdf7;
+}
+
+body {
+  font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+  background-color: var(--bg);
+  margin: 0;
+  padding: 0;
+  touch-action: manipulation; /* 防止雙擊縮放干擾 */
+}
+
+.app-shell {
+  width: 95%;
+  max-width: 1200px; /* 增加最大寬度適應平板 */
+  margin: 0 auto;
+  padding: 10px;
+  text-align: center;
+}
+
 .hidden { display: none !important; }
-.quiz-options { display: flex; flex-direction: row; justify-content: center; gap: 40px; margin: 30px 0; }
-.option-card { flex: 0 1 450px; border: 4px solid var(--line); border-radius: 20px; padding: 20px; background: white; cursor: pointer; }
-.option-card img { width: 100%; height: 350px; object-fit: contain; }
-.label-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 15px; font-size: 1.8rem; font-weight: bold; }
-.audio-btn { width: 50px; height: 50px; border-radius: 50%; border: none; background: var(--green); color: white; font-size: 20px; cursor: pointer; }
-.unknown-button { position: fixed; right: 30px; bottom: 30px; background: #f8d7cf; border: 2px solid #e0b1a8; padding: 15px 40px; border-radius: 50px; font-size: 1.5rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-.replay-btn { background: #dcebf7; border: none; padding: 10px 20px; border-radius: 30px; cursor: pointer; font-weight: bold; }
-.primary-action { background: var(--green); color: white; border: none; padding: 20px 60px; border-radius: 15px; font-size: 1.5rem; cursor: pointer; }
+
+/* 歡迎畫面與結束畫面 */
+#welcomeView, #doneView {
+  padding-top: 50px;
+}
+
+/* 題目與重聽按鈕 */
+.quiz-header {
+  margin-top: 20px;
+}
+
+#questionPrompt {
+  font-size: 2rem; /* 讓平板看得更清楚 */
+  margin-bottom: 20px;
+}
+
+.replay-btn {
+  background: #dcebf7;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 50px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+/* --- 核心：平板並排排版 --- */
+.quiz-options {
+  display: flex;
+  flex-direction: row; /* 強制並排 */
+  flex-wrap: nowrap;   /* 禁止換行 */
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px;           /* 兩張圖中間的間距 */
+  width: 100%;
+}
+
+.option-card {
+  flex: 1;             /* 讓兩個選項各佔 50% */
+  max-width: 48%;      /* 確保不會爆出去 */
+  border: 5px solid var(--line);
+  border-radius: 25px;
+  padding: 15px;
+  background: white;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.option-card img {
+  width: 100%;
+  height: auto;        /* 根據寬度自動縮放高度 */
+  max-height: 50vh;    /* 限制圖片不要超過螢幕高度的一半 */
+  object-fit: contain; /* 確保圖片不變形，完整呈現 */
+  border-radius: 15px;
+}
+
+.label-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 15px;
+  font-size: 1.6rem;
+  font-weight: bold;
+}
+
+.audio-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  background: var(--green);
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 不知道按鈕：固定在右下角 */
+.unknown-button {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  background: #f8d7cf;
+  border: 2px solid #e0b1a8;
+  padding: 15px 40px;
+  border-radius: 50px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  z-index: 999;
+}
+
+.primary-action {
+  background: var(--green);
+  color: white;
+  border: none;
+  padding: 20px 60px;
+  border-radius: 15px;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
