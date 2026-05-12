@@ -1,55 +1,43 @@
 <!doctype html>
 <html lang="zh-Hant">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>幼兒健康圖像式問卷</title>
     <link rel="stylesheet" href="styles.css">
-  </head>
-  <body>
+</head>
+<body>
     <main class="app-shell">
-      <section class="welcome-view" id="welcomeView">
-        <div class="brand-row">
-          <div class="mark">✓</div>
-          <p class="eyebrow">幼兒健康圖像式問卷</p>
-        </div>
-        <div class="start-panel">
-          <label for="displayName">填答者名稱或班級</label>
-          <input id="displayName" type="text" autocomplete="off" placeholder="可留空">
-          <button class="primary-action" id="startButton">開始</button>
-        </div>
-      </section>
+        <section id="welcomeView">
+            <h1>幼兒健康圖像式問卷</h1>
+            <input id="displayName" type="text" placeholder="請輸入班級或姓名">
+            <button class="primary-action" id="startButton">開始</button>
+        </section>
 
-      <section class="quiz-view hidden" id="quizView">
-        <header class="quiz-header">
-          <p class="eyebrow" id="categoryLabel"></p>
-          <h2 id="questionPrompt"></h2>
-          <button class="replay-btn" id="replayButton">🔊 重聽題目</button>
-        </header>
-        <div class="quiz-options">
-          <button class="option-card" id="optionA">
-            <img id="imageA" src="" alt="">
-            <div class="label-row">
-              <span id="labelA"></span>
-              <button class="audio-btn" id="audioA">▶</button>
+        <section class="hidden" id="quizView">
+            <header class="quiz-header">
+                <p id="categoryLabel"></p>
+                <h2 id="questionPrompt"></h2>
+                <button class="replay-btn" id="replayButton">🔊 重聽題目</button>
+            </header>
+            <div class="quiz-options">
+                <button class="option-card" id="optionA">
+                    <img id="imageA" src="" alt="">
+                    <div class="label-row"><span id="labelA"></span><button class="audio-btn" id="audioA">▶</button></div>
+                </button>
+                <button class="option-card" id="optionB">
+                    <img id="imageB" src="" alt="">
+                    <div class="label-row"><span id="labelB"></span><button class="audio-btn" id="audioB">▶</button></div>
+                </button>
             </div>
-          </button>
-          <button class="option-card" id="optionB">
-            <img id="imageB" src="" alt="">
-            <div class="label-row">
-              <span id="labelB"></span>
-              <button class="audio-btn" id="audioB">▶</button>
-            </div>
-          </button>
-        </div>
-        <button class="unknown-button" id="unknownButton">不知道</button>
-      </section>
+            <button class="unknown-button" id="unknownButton">不知道</button>
+        </section>
 
-      <section class="done-view hidden" id="doneView">
-        <h2>完成作答！</h2>
-        <button class="primary-action" id="restartButton">重新開始</button>
-      </section>
+        <section class="hidden" id="doneView">
+            <h2>完成作答！</h2>
+            <button class="primary-action" id="restartButton">重新開始</button>
+        </section>
     </main>
     <script src="app.js"></script>
-  </body>
+</body>
 </html>
