@@ -13,10 +13,10 @@ const questions = [
   ["h6", "衛生", "我會讓我的指甲保持…?", "剪齊短指甲", "微灰灰指甲", "a", 11, 12],
   ["e1", "運動", "我想讓身體更健康，我會⋯？", "跳繩", "看電視", "a", 13, 14],
   ["e2", "運動", "我想讓身體更有力氣，我會⋯？", "拍球", "看書", "a", 15, 16],
-  ["e3", "運動", "我想讓身體更健康，我會⋯？", "游泳", "玩電腦", "a", 17, 18],
-  ["e4", "運動", "我想讓身體更強壯，我會⋯？", "跑步", "滑平板", "a", 19, 20],
-  ["e5", "運動", "我想讓身體更有力量，我會⋯？", "玩攀爬架", "玩電動", "a", 21, 22],
-  ["e6", "運動", "我想讓身體更有力氣，我會⋯？", "騎腳踏車", "玩樂高", "a", 23, 24],
+  ["e3", "運動", "吃完晚餐後，我會⋯？", "散步", "躺著不動", "a", 17, 18],
+  ["e4", "運動", "週末放假時，我會去⋯？", "公園玩耍", "一直玩手機", "a", 19, 20],
+  ["e5", "運動", "我會和家人一起去⋯？", "爬山", "在家睡覺", "a", 21, 22],
+  ["e6", "運動", "體能課時，我會⋯？", "努力練習", "躲在旁邊休息", "a", 23, 24],
   ["n1", "營養", "哪種食物對身體好呢？", "小番茄或切片芭樂", "糖果", "a", 25, 26],
   ["n2", "營養", "哪種食物對身體好呢？", "吃飯", "洋芋片", "a", 27, 28],
   ["n3", "營養", "哪種點心對身體好呢？", "優格", "焦糖布丁", "a", 29, 30],
@@ -97,20 +97,24 @@ function renderQuestion() {
   els.audioA.onclick = () => speak(optA.label);
   els.audioB.onclick = () => speak(optB.label);
 
-  setTimeout(() => { speak(`${q.prompt}。${optA.label}。${optB.label}。`); }, 100);
+  setTimeout(() => { speak(`${q.prompt}。${optA.label}。${optB.label}。`); }, 150);
 }
 
 async function answer(key, label) {
   window.speechSynthesis.cancel();
   state.answers.push({ q: questions[state.index].id, ans: label });
-  if (state.index < questions.length - 1) { state.index++; renderQuestion(); } 
-  else { finish(); }
+  if (state.index < questions.length - 1) { 
+    state.index++; 
+    renderQuestion(); 
+  } else { 
+    finish(); 
+  }
 }
 
 function finish() {
   els.quizView.classList.add("hidden");
   els.doneView.classList.remove("hidden");
-  speak("太棒了！完成囉！");
+  speak("太棒了！你已經完成所有的題目囉！");
   const formData = new FormData();
   formData.append(ENTRY_ID_NAME, state.displayName || "匿名");
   formData.append(ENTRY_ID_DATA, JSON.stringify(state.answers));
