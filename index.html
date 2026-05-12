@@ -8,23 +8,24 @@
 </head>
 <body>
     <main class="app-shell">
-        <section id="welcomeView" class="welcome-view">
+        <section id="welcomeView" class="quiz-view">
             <div class="brand-row">
                 <div class="mark">K</div>
                 <h1>幼兒健康問卷</h1>
             </div>
             <div class="start-panel">
-                <label>班級或姓名</label>
-                <input id="displayName" type="text" placeholder="請輸入..." autocomplete="off">
+                <label>請輸入班級或姓名</label>
+                <input id="displayName" type="text" placeholder="例如：大熊班 王小明" autocomplete="off">
                 <button class="primary-action" id="startButton">開始問卷</button>
             </div>
         </section>
 
         <section id="quizView" class="quiz-view hidden">
             <header class="quiz-header">
-                <div>
-                    <p id="categoryLabel" class="eyebrow"></p>
+                <div class="counter"><span id="currentNum">1</span> / 42</div>
+                <div class="title-area">
                     <h2 id="questionPrompt">載入中...</h2>
+                    <span id="categoryLabel" class="category-tag"></span>
                 </div>
                 <button class="replay-btn" id="replayButton" type="button">🔊 重聽題目</button>
             </header>
@@ -36,7 +37,7 @@
                     </div>
                     <div class="option-caption">
                         <span id="labelA" class="option-label"></span>
-                        <button class="option-audio" id="audioA">▶</button>
+                        <button class="option-audio" id="audioA" type="button">▶</button>
                     </div>
                 </div>
 
@@ -46,19 +47,20 @@
                     </div>
                     <div class="option-caption">
                         <span id="labelB" class="option-label"></span>
-                        <button class="option-audio" id="audioB">▶</button>
+                        <button class="option-audio" id="audioB" type="button">▶</button>
                     </div>
                 </div>
             </div>
 
             <button class="unknown-button" id="unknownButton" type="button">不知道</button>
+            <div class="footer-brand">幼兒健康圖像式問卷</div>
         </section>
 
-        <section id="doneView" class="done-view hidden">
+        <section id="doneView" class="quiz-view hidden" style="text-align:center;">
             <div class="done-symbol">✓</div>
-            <h2>完成作答！</h2>
-            <p>太棒了，你已經完成所有的題目囉！</p>
-            <button class="primary-action" id="restartButton">重新開始</button>
+            <h2>太棒了！完成囉！</h2>
+            <p style="font-size:1.5rem; color:#66727d; margin:20px 0;">謝謝你的幫忙，資料已經成功送出。 </p>
+            <button class="primary-action" onclick="location.reload()">重新開始</button>
         </section>
     </main>
     <script src="app.js"></script>
