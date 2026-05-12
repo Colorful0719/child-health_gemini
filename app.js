@@ -6,10 +6,10 @@ const questions = [
   ["h1", "衛生", "吃完飯後，我會...?", "飯後刷牙", "吃完直接玩玩具", "a", 1, 2],
   ["h2", "衛生", "睡覺前，我會...?", "洗澡", "髒髒的去睡覺", "a", 3, 4],
   ["h3", "衛生", "上廁所後，我會…?", "上廁所後洗手", "直接跑走", "a", 5, 6],
-  ["h4", "衛生", "打噴嚏的時候，我會…?", "手遮口鼻", "直接對著別人", "a", 7, 8],
+  ["h4", "衛生", "打噴嚏的時候，我會…?", "衛生紙遮口鼻", "直接對著別人", "a", 7, 8],
   ["h5", "衛生", "吃飯的時候，我會用….?", "乾淨餐具組", "髒髒餐具", "a", 9, 10],
-  ["h6", "衛生", "我會讓我的指甲保持…?", "剪齊短指甲", "灰灰長指甲", "a", 11, 12],
-  ["e1", "運動", "我想讓身體更健康，我會⋯？", "玩跳繩", "看電視", "a", 13, 14],
+  ["h6", "衛生", "我會讓我的指甲保持…?", "剪齊短指甲", "微灰灰指甲", "a", 11, 12],
+  ["e1", "運動", "我想讓身體更健康，我會⋯？", "跳繩", "看電視", "a", 13, 14],
   ["e2", "運動", "我想讓身體更有力氣，我會⋯？", "拍球", "看書", "a", 15, 16],
   ["e3", "運動", "吃完晚餐後，我會⋯？", "散步", "躺著不動", "a", 17, 18],
   ["e4", "運動", "週末放假時，我會去⋯？", "公園玩耍", "一直玩手機", "a", 19, 20],
@@ -62,7 +62,6 @@ function renderQuestion() {
   document.getElementById("categoryLabel").textContent = q[1];
   document.getElementById("questionPrompt").textContent = q[2];
   
-  // 渲染圖片 (assets/image#.png)
   document.getElementById("imageA").src = "assets/image" + q[6] + ".png";
   document.getElementById("imageB").src = "assets/image" + q[7] + ".png";
   document.getElementById("labelA").textContent = q[3];
@@ -73,52 +72,87 @@ function renderQuestion() {
 
 function handleAnswer(selectedLabel) {
   const q = questions[state.index];
+  // 判定正確答案文字
   const correctLabel = (q[5] === 'a') ? q[3] : q[4];
-  const isCorrect = (selectedLabel === correctLabel) ? 1 : 0;
+  let status = "";
+  let scoreValue = 0;
 
-  state.answers.push({ id: q[0], cat: q[1], isCorrect: isCorrect, ans: selectedLabel });
+  if (selectedLabel === "不知道") {
+    status = "不知道";
+    scoreValue = 0;
+  } else if (selectedLabel === correctLabel) {
+    status = "正確";
+    scoreValue = 1;
+  } else {
+    status = "錯誤";
+    scoreValue = 0;
+  }
+
+  // 紀錄資料
+  state.answers.push({
+    id: q[0],        // 題號(如h1)
+    cat: q[1],       // 面向(如衛生)
+    q: q[2],         // 題目文字
+    ans: selectedLabel, // 幼兒選的選項
+    status: status,  // 正確/錯誤/不知道
+    score: scoreValue // 1或0
+  });
 
   if (state.index < questions.length - 1) {
     state.index++;
     renderQuestion();
   } else {
-    submitResults();
+    finishQuiz();
   }
 }
 
-function submitResults() {
+function finishQuiz() {
   document.getElementById("quizView").classList.add("hidden");
   document.getElementById("doneView").classList.remove("hidden");
+  speak("完成囉，謝謝你的幫忙！");
+
+  // --- 計算計分系統 ---
+  const report = { "衛生": 0, "運動": 0, "營養": 0, "視力": 0, "安全": 0, "總分": 0 };
   
-  const scores = { "衛生": 0, "運動": 0, "營養": 0, "視力": 0, "安全": 0, "總計": 0 };
   state.answers.forEach(item => {
-    if (item.isCorrect === 1) {
-      scores[item.cat]++;
-      scores["總計"]++;
+    if (item.score === 1) {
+      report[item.cat]++;
+      report["總分"]++;
     }
   });
 
-  const summary = `
-姓名: ${state.displayName}
-[分項得分]
-衛生: ${scores["衛生"]}/6, 運動: ${scores["運動"]}/6, 營養: ${scores["營養"]}/9, 視力: ${scores["視力"]}/6, 安全: ${scores["安全"]}/15
-總答對題數: ${scores["總計"]}/42
-[詳細紀錄]: ${JSON.stringify(state.answers)}
+  // --- 格式化匯出字串 ---
+  const resultText = `
+【受試者】：${state.displayName}
+【總答對數】：${report["總分"]} / 42
+
+【面向得分統計】：
+1. 衛生：${report["衛生"]} / 6
+2. 運動：${report["運動"]} / 6
+3. 營養：${report["營養"]} / 9
+4. 視力：${report["視力"]} / 6
+5. 安全：${report["安全"]} / 15
+
+【詳細對錯清單】：
+${state.answers.map((a, i) => `${i+1}. [${a.cat}] ${a.q} -> 選項: ${a.ans} (${a.status})`).join('\n')}
   `.trim();
 
+  // --- 送出至 Google 表單 ---
   const formData = new FormData();
-  formData.append(ENTRY_ID_NAME, state.displayName);
-  formData.append(ENTRY_ID_DATA, summary);
+  formData.append(ENTRY_ID_NAME, state.displayName || "匿名");
+  formData.append(ENTRY_ID_DATA, resultText);
 
   fetch("https://docs.google.com/forms/d/e/" + FORM_ID + "/formResponse", {
-    method: "POST", mode: "no-cors", body: formData
+    method: "POST",
+    mode: "no-cors",
+    body: formData
   });
 }
 
 window.onload = () => {
   document.getElementById("startButton").onclick = () => {
     state.displayName = document.getElementById("displayName").value.trim();
-    if (!state.displayName) return alert("請輸入姓名");
+    if(!state.displayName) { alert("請輸入姓名"); return; }
     document.getElementById("welcomeView").classList.add("hidden");
     document.getElementById("quizView").classList.remove("hidden");
     renderQuestion();
