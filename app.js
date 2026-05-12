@@ -1,9 +1,9 @@
-// --- Google 表單串接設定區 ---
+// --- 1. 設定區 ---
 const FORM_ID = "1FAIpQLScXP8f1JzFq-kFYnZiLsGDUXQSQDUcE0OieeOMg4Lr6YvZzgA"; 
 const ENTRY_ID_NAME = "entry.111555726"; 
 const ENTRY_ID_DATA = "entry.2065308468"; 
 
-// 題目資料
+// --- 2. 題目資料 (42題) ---
 const questions = [
   ["h1", "衛生", "吃完飯後，我會...?", "飯後刷牙", "吃完直接玩玩具", "a", 1, 2],
   ["h2", "衛生", "睡覺前，我會...?", "洗澡", "髒髒的去睡覺", "a", 3, 4],
@@ -47,91 +47,97 @@ const questions = [
   ["s13", "安全", "如果發現家裡失火冒煙了，我會…？", "摀住口鼻低姿勢逃生", "站著走動", "a", 79, 80],
   ["s14", "安全", "看到顏色漂亮的小藥丸時，我會…？", "給大人", "拿來吃吃看", "a", 81, 82],
   ["s15", "安全", "如果我不小心受傷流血了，我會…", "受傷了找大人幫忙", "自己躲起來哭", "a", 83, 84]
-].map(([id, category, prompt, a, b, correctOption, imgA, imgB], idx) => ({
-  id,
-  category,
-  prompt,
-  order: idx % 2 === 0 ? ["a", "b"] : ["b", "a"],
-  options: {
-    a: { key: "a", label: a, image: `assets/image${imgA}.png` },
-    b: { key: "b", label: b, image: `assets/image${imgB}.png` }
-  }
-}));
+];
 
-const state = { index: 0, answers: [], displayName: "" };
-
-const els = {
-  welcomeView: document.getElementById("welcomeView"),
-  quizView: document.getElementById("quizView"),
-  doneView: document.getElementById("doneView"),
-  displayName: document.getElementById("displayName"),
-  startButton: document.getElementById("startButton"),
-  categoryLabel: document.getElementById("categoryLabel"),
-  questionText: document.getElementById("questionPrompt"),
-  optionA: document.getElementById("optionA"),
-  optionB: document.getElementById("optionB"),
-  imageA: document.getElementById("imageA"),
-  imageB: document.getElementById("imageB"),
-  labelA: document.getElementById("labelA"),
-  labelB: document.getElementById("labelB"),
-  audioA: document.getElementById("audioA"),
-  audioB: document.getElementById("audioB"),
-  replayButton: document.getElementById("replayButton"),
-  unknownButton: document.getElementById("unknownButton"),
-  restartButton: document.getElementById("restartButton")
+// --- 3. 狀態控制 ---
+let state = {
+  index: 0,
+  answers: [],
+  displayName: ""
 };
 
-function renderQuestion() {
-  const q = questions[state.index];
-  els.categoryLabel.textContent = q.category;
-  els.questionText.textContent = q.prompt;
-  const optA = q.options[q.order[0]];
-  const optB = q.options[q.order[1]];
-  els.imageA.src = optA.image;
-  els.labelA.textContent = optA.label;
-  els.imageB.src = optB.image;
-  els.labelB.textContent = optB.label;
-
-  els.optionA.onclick = (e) => { if (!e.target.closest('.audio-btn')) answer(optA.key, optA.label); };
-  els.optionB.onclick = (e) => { if (!e.target.closest('.audio-btn')) answer(optB.key, optB.label); };
-  els.audioA.onclick = () => speak(optA.label);
-  els.audioB.onclick = () => speak(optB.label);
-
-  setTimeout(() => { speak(`${q.prompt}。${optA.label}。${optB.label}。`); }, 150);
-}
-
-async function answer(key, label) {
-  window.speechSynthesis.cancel();
-  state.answers.push({ q: questions[state.index].id, ans: label });
-  if (state.index < questions.length - 1) { 
-    state.index++; 
-    renderQuestion(); 
-  } else { 
-    finish(); 
-  }
-}
-
-function finish() {
-  els.quizView.classList.add("hidden");
-  els.doneView.classList.remove("hidden");
-  speak("太棒了！你已經完成所有的題目囉！");
-  const formData = new FormData();
-  formData.append(ENTRY_ID_NAME, state.displayName || "匿名");
-  formData.append(ENTRY_ID_DATA, JSON.stringify(state.answers));
-  fetch(`https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`, { method: "POST", mode: "no-cors", body: formData });
-}
-
+// --- 4. 語音功能 ---
 function speak(text) {
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = "zh-TW"; u.rate = 0.8;
+  u.lang = "zh-TW";
+  u.rate = 0.8;
   window.speechSynthesis.speak(u);
 }
 
-els.startButton.onclick = () => {
-  state.displayName = els.displayName.value.trim();
-  els.welcomeView.classList.add("hidden");
-  els.quizView.classList.remove("hidden");
+// --- 5. 渲染題目 ---
+function renderQuestion() {
+  const q = questions[state.index];
+  const [id, cat, prompt, labelA, labelB, correct, imgA, imgB] = q;
+
+  // 更新介面
+  document.getElementById("categoryLabel").textContent = cat;
+  document.getElementById("questionPrompt").textContent = prompt;
+  document.getElementById("imageA").src = "assets/image" + imgA + ".png";
+  document.getElementById("imageB").src = "assets/image" + imgB + ".png";
+  document.getElementById("labelA").textContent = labelA;
+  document.getElementById("labelB").textContent = labelB;
+
+  // 綁定點擊事件
+  document.getElementById("optionA").onclick = (e) => {
+    if (e.target.closest('.audio-btn')) return;
+    handleAnswer(labelA);
+  };
+  document.getElementById("optionB").onclick = (e) => {
+    if (e.target.closest('.audio-btn')) return;
+    handleAnswer(labelB);
+  };
+
+  // 綁定小播放鈕
+  document.getElementById("audioA").onclick = (e) => { e.stopPropagation(); speak(labelA); };
+  document.getElementById("audioB").onclick = (e) => { e.stopPropagation(); speak(labelB); };
+
+  // 自動朗讀
+  setTimeout(() => { speak(prompt + "。" + labelA + "。" + labelB); }, 200);
+}
+
+// --- 6. 處理作答 ---
+function handleAnswer(ansLabel) {
+  state.answers.push({ q: questions[state.index][2], ans: ansLabel });
+  
+  if (state.index < questions.length - 1) {
+    state.index++;
+    renderQuestion();
+  } else {
+    submitFinal();
+  }
+}
+
+// --- 7. 提交與結束 ---
+function submitFinal() {
+  document.getElementById("quizView").classList.add("hidden");
+  document.getElementById("doneView").classList.remove("hidden");
+  speak("太棒了！完成囉！");
+
+  const formData = new FormData();
+  formData.append(ENTRY_ID_NAME, state.displayName || "匿名");
+  formData.append(ENTRY_ID_DATA, JSON.stringify(state.answers));
+
+  fetch("https://docs.google.com/forms/d/e/" + FORM_ID + "/formResponse", {
+    method: "POST",
+    mode: "no-cors",
+    body: formData
+  });
+}
+
+// --- 8. 初始化綁定 ---
+window.onload = () => {
+  document.getElementById("startButton").onclick = () => {
+    state.displayName = document.getElementById("displayName").value.trim();
+    document.getElementById("welcomeView").classList.add("hidden");
+    document.getElementById("quizView").classList.remove("hidden");
+    renderQuestion();
+  };
+
+  document.getElementById("replayButton").onclick = () => renderQuestion();
+  document.getElementById("unknownButton").onclick = () => handleAnswer("不知道");
+  document.getElementById("restartButton").onclick = () => window.location.reload();
+};
   renderQuestion();
 };
 els.restartButton.onclick = () => window.location.reload();
