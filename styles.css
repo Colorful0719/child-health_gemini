@@ -1,122 +1,33 @@
-:root {
-  --green: #2c7a5b;
-  --line: #d8e1e8;
-  --bg: #fffdf7;
-}
+<section id="quizView" class="quiz-view hidden">
+    <header class="quiz-header">
+        <div>
+            <p id="categoryLabel" class="eyebrow"></p>
+            <h2 id="questionPrompt"></h2>
+        </div>
+        <button class="replay-btn" id="replayButton">🔊 重聽題目</button>
+    </header>
 
-/* 基礎設定 */
-body {
-  font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-  background-color: var(--bg);
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  overflow-x: hidden;
-}
+    <div class="options-grid">
+        <div class="picture-option" id="optionA">
+            <div class="image-frame">
+                <img id="imageA" src="" alt="">
+            </div>
+            <div class="option-caption">
+                <span id="labelA" class="option-label"></span>
+                <button class="option-audio" id="audioA">▶</button>
+            </div>
+        </div>
 
-.app-shell {
-  width: 98vw; /* 使用螢幕寬度 */
-  max-width: 1400px;
-  padding: 10px;
-  box-sizing: border-box;
-}
+        <div class="picture-option" id="optionB">
+            <div class="image-frame">
+                <img id="imageB" src="" alt="">
+            </div>
+            <div class="option-caption">
+                <span id="labelB" class="option-label"></span>
+                <button class="option-audio" id="audioB">▶</button>
+            </div>
+        </div>
+    </div>
 
-.hidden { display: none !important; }
-
-/* 題目文字 */
-#questionPrompt {
-  font-size: 2rem;
-  margin: 10px 0;
-  color: #333;
-}
-
-/* --- 終極方案：使用 CSS Grid 網格系統 --- */
-.quiz-options {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr !important; /* 絕對平分兩欄 */
-  gap: 15px; /* 圖片中間的距離 */
-  width: 100%;
-  max-width: 1200px;
-  margin: 20px auto;
-  padding: 0 10px;
-  box-sizing: border-box;
-}
-
-.option-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border: 5px solid var(--line);
-  border-radius: 25px;
-  padding: 15px;
-  background: white;
-  cursor: pointer;
-  width: 100%; /* 佔滿網格的一半 */
-  box-sizing: border-box;
-  min-width: 0; /* 防止溢出 */
-}
-
-.option-card img {
-  width: 100%;
-  height: 50vh; /* 圖片高度佔螢幕一半，確保橫向視覺流暢 */
-  object-fit: contain; /* 圖片不變形 */
-  border-radius: 15px;
-}
-
-.label-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 15px;
-  font-size: 1.8rem;
-  font-weight: bold;
-}
-
-/* 播放與功能按鈕 */
-.audio-btn {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  border: none;
-  background: var(--green);
-  color: white;
-  font-size: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.replay-btn {
-  background: #dcebf7;
-  border: none;
-  padding: 10px 25px;
-  border-radius: 50px;
-  font-weight: bold;
-  font-size: 1.2rem;
-  margin-bottom: 10px;
-}
-
-/* 右下角固定 */
-.unknown-button {
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  background: #f8d7cf;
-  border: 2px solid #e0b1a8;
-  padding: 15px 40px;
-  border-radius: 50px;
-  font-size: 1.4rem;
-  font-weight: bold;
-  z-index: 1001;
-}
-
-.primary-action {
-  background: var(--green);
-  color: white;
-  border: none;
-  padding: 20px 60px;
-  border-radius: 15px;
-  font-size: 1.8rem;
-}
+    <button class="unknown-button" id="unknownButton">不知道</button>
+</section>
