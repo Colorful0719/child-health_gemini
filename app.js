@@ -2,9 +2,8 @@
 const FORM_ID = "1FAIpQLScXP8f1JzFq-kFYnZiLsGDUXQSQDUcE0OieeOMg4Lr6YvZzgA"; 
 const ENTRY_ID_NAME = "entry.111555726"; 
 const ENTRY_ID_DATA = "entry.2065308468"; 
-// ----------------------------------------------
 
-// 完整 42 題資料
+// 題目資料
 const questions = [
   ["h1", "衛生", "吃完飯後，我會...?", "飯後刷牙", "吃完直接玩玩具", "a", 1, 2],
   ["h2", "衛生", "睡覺前，我會...?", "洗澡", "髒髒的去睡覺", "a", 3, 4],
@@ -54,17 +53,12 @@ const questions = [
   prompt,
   order: idx % 2 === 0 ? ["a", "b"] : ["b", "a"],
   options: {
-    // 這裡使用相對路徑並確保檔名格式正確
     a: { key: "a", label: a, image: `assets/image${imgA}.png` },
     b: { key: "b", label: b, image: `assets/image${imgB}.png` }
   }
 }));
 
-const state = {
-  index: 0,
-  answers: [],
-  displayName: ""
-};
+const state = { index: 0, answers: [], displayName: "" };
 
 const els = {
   welcomeView: document.getElementById("welcomeView"),
@@ -87,82 +81,55 @@ const els = {
   restartButton: document.getElementById("restartButton")
 };
 
-function start() {
-  state.displayName = els.displayName.value.trim() || "匿名幼兒";
-  state.index = 0;
-  state.answers = [];
-  els.welcomeView.classList.add("hidden");
-  els.quizView.classList.remove("hidden");
-  renderQuestion();
-}
-
 function renderQuestion() {
   const q = questions[state.index];
   els.categoryLabel.textContent = q.category;
   els.questionText.textContent = q.prompt;
-
   const optA = q.options[q.order[0]];
   const optB = q.options[q.order[1]];
-
   els.imageA.src = optA.image;
   els.labelA.textContent = optA.label;
   els.imageB.src = optB.image;
   els.labelB.textContent = optB.label;
 
-  els.optionA.onclick = (e) => {
-    if (e.target.closest('.audio-btn')) return;
-    answer(optA.key, optA.label);
-  };
-  els.optionB.onclick = (e) => {
-    if (e.target.closest('.audio-btn')) return;
-    answer(optB.key, optB.label);
-  };
-
+  els.optionA.onclick = (e) => { if (!e.target.closest('.audio-btn')) answer(optA.key, optA.label); };
+  els.optionB.onclick = (e) => { if (!e.target.closest('.audio-btn')) answer(optB.key, optB.label); };
   els.audioA.onclick = () => speak(optA.label);
   els.audioB.onclick = () => speak(optB.label);
 
-  setTimeout(() => {
-    speak(`${q.prompt}。${optA.label}。${optB.label}。`);
-  }, 100);
+  setTimeout(() => { speak(`${q.prompt}。${optA.label}。${optB.label}。`); }, 100);
 }
 
 async function answer(key, label) {
   window.speechSynthesis.cancel();
-  state.answers.push({ qId: questions[state.index].id, ans: label });
-
-  if (state.index < questions.length - 1) {
-    state.index++;
-    renderQuestion();
-  } else {
-    finish();
-  }
+  state.answers.push({ q: questions[state.index].id, ans: label });
+  if (state.index < questions.length - 1) { state.index++; renderQuestion(); } 
+  else { finish(); }
 }
 
-async function finish() {
+function finish() {
   els.quizView.classList.add("hidden");
   els.doneView.classList.remove("hidden");
   speak("太棒了！完成囉！");
-
   const formData = new FormData();
-  formData.append(ENTRY_ID_NAME, state.displayName);
+  formData.append(ENTRY_ID_NAME, state.displayName || "匿名");
   formData.append(ENTRY_ID_DATA, JSON.stringify(state.answers));
-
-  fetch(`https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`, {
-    method: "POST",
-    mode: "no-cors",
-    body: formData
-  });
+  fetch(`https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`, { method: "POST", mode: "no-cors", body: formData });
 }
 
 function speak(text) {
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = "zh-TW";
-  u.rate = 0.8;
+  u.lang = "zh-TW"; u.rate = 0.8;
   window.speechSynthesis.speak(u);
 }
 
-els.startButton.onclick = start;
+els.startButton.onclick = () => {
+  state.displayName = els.displayName.value.trim();
+  els.welcomeView.classList.add("hidden");
+  els.quizView.classList.remove("hidden");
+  renderQuestion();
+};
 els.restartButton.onclick = () => window.location.reload();
 els.replayButton.onclick = () => renderQuestion();
 els.unknownButton.onclick = () => answer("unknown", "不知道");
