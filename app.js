@@ -130,9 +130,10 @@ function renderQuestion() {
   els.audioA.onclick = () => speak(optA.label);
   els.audioB.onclick = () => speak(optB.label);
 
+  // 進入題目時，自動連讀題目與選項名稱
   setTimeout(() => {
-    speak(q.prompt);
-  }, 300);
+    speak(`${q.prompt}。${optA.label}。${optB.label}。`);
+  }, 100);
 }
 
 async function answer(selectedKey, label) {
@@ -177,5 +178,10 @@ function speak(text) {
 
 els.startButton.addEventListener("click", start);
 els.restartButton.addEventListener("click", () => window.location.reload());
-els.replayButton.addEventListener("click", () => speak(questions[state.index].prompt));
+els.replayButton.addEventListener("click", () => {
+    const q = questions[state.index];
+    const optA = q.options[q.order[0]];
+    const optB = q.options[q.order[1]];
+    speak(`${q.prompt}。${optA.label}。${optB.label}。`);
+});
 els.unknownButton.addEventListener("click", () => answer("unknown", "不知道"));
