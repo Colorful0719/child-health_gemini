@@ -4,7 +4,7 @@ const ENTRY_ID_NAME = "entry.111555726";
 const ENTRY_ID_DATA = "entry.2065308468"; 
 // ----------------------------------------------
 
-// 根據 Word 檔案內容對應的 42 題完整資料
+// 完整 42 題題目資料
 const questions = [
   ["h1", "衛生", "吃完飯後，我會...?", "飯後刷牙", "吃完直接玩玩具", "a", 1, 2],
   ["h2", "衛生", "睡覺前，我會...?", "洗澡", "髒髒的去睡覺", "a", 3, 4],
@@ -109,7 +109,6 @@ function renderQuestion() {
   els.categoryLabel.textContent = q.category;
   els.questionText.textContent = q.prompt;
 
-  // 根據打亂後的順序分配選項
   const optA = q.options[q.order[0]];
   const optB = q.options[q.order[1]];
 
@@ -121,10 +120,31 @@ function renderQuestion() {
   els.optionA.onclick = () => answer(optA.key, optA.label);
   els.optionB.onclick = () => answer(optB.key, optB.label);
 
-  speak(`${q.category}題。${q.prompt}。第一個選項是${optA.label}。第二個選項是${optB.label}。`);
+  // 延遲一點點播放，避免切換頁面時語音被中斷
+  setTimeout(() => {
+    speakQuestion(q, optA, optB);
+  }, 300);
+}
+
+function speakQuestion(q, optA, optB) {
+  window.speechSynthesis.cancel();
+  state.speechToken++;
+  const token = state.speechToken;
+
+  // 組合一段自然的導引語句
+  const fullText = `${q.prompt}。第一張圖，${optA.label}。第二張圖，${optB.label}。如果不清楚，可以點一下不知道。`;
+  
+  const utterance = new SpeechSynthesisUtterance(fullText);
+  utterance.lang = "zh-TW";
+  utterance.rate = 0.75; // 稍慢的語速方便幼兒理解
+  utterance.pitch = 1.05; // 稍微高一點的音調顯得比較親切
+  
+  window.speechSynthesis.speak(utterance);
 }
 
 async function answer(selectedKey, label) {
+  window.speechSynthesis.cancel(); // 點選後停止目前說話
+  
   state.answers.push({
     questionId: questions[state.index].id,
     selected: selectedKey,
@@ -142,6 +162,10 @@ async function answer(selectedKey, label) {
 
 async function finish() {
   show(els.doneView);
+  
+  // 唸出完成語句
+  speak("太棒了！你已經完成所有的題目囉！");
+
   const formData = new FormData();
   formData.append(ENTRY_ID_NAME, state.displayName || state.id);
   formData.append(ENTRY_ID_DATA, JSON.stringify(state.answers));
@@ -167,5 +191,13 @@ function speak(text) {
 
 els.startButton.addEventListener("click", start);
 els.restartButton.addEventListener("click", () => window.location.reload());
-els.replayButton.addEventListener("click", () => renderQuestion());
+
+// 讓幼兒可以重複聽題目
+els.replayButton.addEventListener("click", () => {
+  const q = questions[state.index];
+  const optA = q.options[q.order[0]];
+  const optB = q.options[q.order[1]];
+  speakQuestion(q, optA, optB);
+});
+
 els.unknownButton.addEventListener("click", () => answer("unknown", "不知道"));
