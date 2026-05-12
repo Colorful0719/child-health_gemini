@@ -6,10 +6,10 @@ const questions = [
   ["h1", "衛生", "吃完飯後，我會...?", "飯後刷牙", "吃完直接玩玩具", "a", 1, 2],
   ["h2", "衛生", "睡覺前，我會...?", "洗澡", "髒髒的去睡覺", "a", 3, 4],
   ["h3", "衛生", "上廁所後，我會…?", "上廁所後洗手", "直接跑走", "a", 5, 6],
-  ["h4", "衛生", "打噴嚏的時候，我會…?", "衛生紙遮口鼻", "直接對著別人", "a", 7, 8],
+  ["h4", "衛生", "打噴嚏的時候，我會…?", "手遮口鼻", "直接對著別人", "a", 7, 8],
   ["h5", "衛生", "吃飯的時候，我會用….?", "乾淨餐具組", "髒髒餐具", "a", 9, 10],
-  ["h6", "衛生", "我會讓我的指甲保持…?", "剪齊短指甲", "微灰灰指甲", "a", 11, 12],
-  ["e1", "運動", "我想讓身體更健康，我會⋯？", "跳繩", "看電視", "a", 13, 14],
+  ["h6", "衛生", "我會讓我的指甲保持…?", "剪齊短指甲", "灰灰長指甲", "a", 11, 12],
+  ["e1", "運動", "我想讓身體更健康，我會⋯？", "玩跳繩", "看電視", "a", 13, 14],
   ["e2", "運動", "我想讓身體更有力氣，我會⋯？", "拍球", "看書", "a", 15, 16],
   ["e3", "運動", "吃完晚餐後，我會⋯？", "散步", "躺著不動", "a", 17, 18],
   ["e4", "運動", "週末放假時，我會去⋯？", "公園玩耍", "一直玩手機", "a", 19, 20],
@@ -58,48 +58,79 @@ function speak(text) {
 
 function renderQuestion() {
   const q = questions[state.index];
+  document.getElementById("currentNum").textContent = state.index + 1;
   document.getElementById("categoryLabel").textContent = q[1];
   document.getElementById("questionPrompt").textContent = q[2];
+  
+  // 渲染圖片 (assets/image#.png)
   document.getElementById("imageA").src = "assets/image" + q[6] + ".png";
   document.getElementById("imageB").src = "assets/image" + q[7] + ".png";
   document.getElementById("labelA").textContent = q[3];
   document.getElementById("labelB").textContent = q[4];
 
-  // 選項點擊 (排除按到播放鈕)
-  document.getElementById("optionA").onclick = (e) => { if (!e.target.closest('.option-audio')) handleAnswer(q[3]); };
-  document.getElementById("optionB").onclick = (e) => { if (!e.target.closest('.option-audio')) handleAnswer(q[4]); };
-  
-  // 播放鈕單獨播放
-  document.getElementById("audioA").onclick = (e) => { e.stopPropagation(); speak(q[3]); };
-  document.getElementById("audioB").onclick = (e) => { e.stopPropagation(); speak(q[4]); };
-
-  setTimeout(() => { speak(q[2] + "。" + q[3] + "。" + q[4]); }, 200);
+  setTimeout(() => { speak(q[2] + "。" + q[3] + "。" + q[4]); }, 300);
 }
 
-function handleAnswer(ansLabel) {
-  state.answers.push({ q: questions[state.index][2], a: ansLabel });
+function handleAnswer(selectedLabel) {
+  const q = questions[state.index];
+  const correctLabel = (q[5] === 'a') ? q[3] : q[4];
+  const isCorrect = (selectedLabel === correctLabel) ? 1 : 0;
+
+  state.answers.push({ id: q[0], cat: q[1], isCorrect: isCorrect, ans: selectedLabel });
+
   if (state.index < questions.length - 1) {
     state.index++;
     renderQuestion();
   } else {
-    document.getElementById("quizView").classList.add("hidden");
-    document.getElementById("doneView").classList.remove("hidden");
-    speak("太棒了！完成囉！");
-    const formData = new FormData();
-    formData.append(ENTRY_ID_NAME, state.displayName || "匿名");
-    formData.append(ENTRY_ID_DATA, JSON.stringify(state.answers));
-    fetch("https://docs.google.com/forms/d/e/" + FORM_ID + "/formResponse", { method: "POST", mode: "no-cors", body: formData });
+    submitResults();
   }
+}
+
+function submitResults() {
+  document.getElementById("quizView").classList.add("hidden");
+  document.getElementById("doneView").classList.remove("hidden");
+  
+  const scores = { "衛生": 0, "運動": 0, "營養": 0, "視力": 0, "安全": 0, "總計": 0 };
+  state.answers.forEach(item => {
+    if (item.isCorrect === 1) {
+      scores[item.cat]++;
+      scores["總計"]++;
+    }
+  });
+
+  const summary = `
+姓名: ${state.displayName}
+[分項得分]
+衛生: ${scores["衛生"]}/6, 運動: ${scores["運動"]}/6, 營養: ${scores["營養"]}/9, 視力: ${scores["視力"]}/6, 安全: ${scores["安全"]}/15
+總答對題數: ${scores["總計"]}/42
+[詳細紀錄]: ${JSON.stringify(state.answers)}
+  `.trim();
+
+  const formData = new FormData();
+  formData.append(ENTRY_ID_NAME, state.displayName);
+  formData.append(ENTRY_ID_DATA, summary);
+
+  fetch("https://docs.google.com/forms/d/e/" + FORM_ID + "/formResponse", {
+    method: "POST", mode: "no-cors", body: formData
+  });
 }
 
 window.onload = () => {
   document.getElementById("startButton").onclick = () => {
     state.displayName = document.getElementById("displayName").value.trim();
+    if (!state.displayName) return alert("請輸入姓名");
     document.getElementById("welcomeView").classList.add("hidden");
     document.getElementById("quizView").classList.remove("hidden");
     renderQuestion();
   };
+  document.getElementById("optionA").onclick = (e) => {
+    if (!e.target.closest('.option-audio')) handleAnswer(document.getElementById("labelA").textContent);
+  };
+  document.getElementById("optionB").onclick = (e) => {
+    if (!e.target.closest('.option-audio')) handleAnswer(document.getElementById("labelB").textContent);
+  };
+  document.getElementById("audioA").onclick = (e) => { e.stopPropagation(); speak(document.getElementById("labelA").textContent); };
+  document.getElementById("audioB").onclick = (e) => { e.stopPropagation(); speak(document.getElementById("labelB").textContent); };
   document.getElementById("replayButton").onclick = () => renderQuestion();
   document.getElementById("unknownButton").onclick = () => handleAnswer("不知道");
-  document.getElementById("restartButton").onclick = () => window.location.reload();
 };
