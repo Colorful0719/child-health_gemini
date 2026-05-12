@@ -9,66 +9,67 @@ body {
   background-color: var(--bg);
   margin: 0;
   padding: 0;
-  touch-action: manipulation;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
 }
 
 .app-shell {
-  width: 95%;
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 98%;
+  max-width: 1400px; /* 增加寬度以適應橫向排列 */
   padding: 10px;
   text-align: center;
 }
 
 .hidden { display: none !important; }
 
-#welcomeView, #doneView { padding-top: 60px; }
-
-.eyebrow { color: var(--green); font-weight: bold; font-size: 1.2rem; }
-
-#questionPrompt { font-size: 2.2rem; margin: 15px 0; color: #333; }
+/* 題目文字優化 */
+#questionPrompt {
+  font-size: 2.2rem;
+  margin: 15px 0;
+  color: #333;
+}
 
 .replay-btn {
   background: #dcebf7;
   border: none;
-  padding: 12px 25px;
+  padding: 10px 25px;
   border-radius: 50px;
   font-size: 1.2rem;
   font-weight: bold;
   cursor: pointer;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
-/* 核心：圖片並排 */
+/* --- 核心：橫向並排排版 --- */
 .quiz-options {
   display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
+  flex-direction: row; /* 強制橫向 */
+  flex-wrap: nowrap;   /* 絕對禁止換行 */
   justify-content: center;
-  align-items: stretch;
-  gap: 25px;
+  align-items: stretch; /* 讓兩個卡片高度一致 */
+  gap: 20px;           /* 卡片之間的間距 */
   width: 100%;
 }
 
 .option-card {
-  flex: 1;
-  max-width: 48%;
+  flex: 1;             /* 讓兩張圖平分剩餘空間 */
+  min-width: 0;        /* 防止內容撐開 flex 容器 */
   border: 5px solid var(--line);
-  border-radius: 25px;
-  padding: 20px;
+  border-radius: 20px;
+  padding: 15px;
   background: white;
   cursor: pointer;
-  transition: transform 0.1s;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
-
-.option-card:active { transform: scale(0.98); }
 
 .option-card img {
   width: 100%;
-  height: auto;
-  max-height: 45vh;
-  object-fit: contain;
-  border-radius: 15px;
+  height: 45vh;        /* 限制圖片高度，避免平板上過長需要捲動 */
+  object-fit: contain; /* 確保圖片比例正確不變形 */
+  border-radius: 12px;
+  background-color: #f9f9f9;
 }
 
 .label-row {
@@ -81,9 +82,10 @@ body {
   font-weight: bold;
 }
 
+/* 語音按鈕加大 */
 .audio-btn {
-  width: 65px;
-  height: 65px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   border: none;
   background: var(--green);
@@ -98,24 +100,24 @@ body {
 /* 固定在右下角 */
 .unknown-button {
   position: fixed;
-  right: 25px;
-  bottom: 25px;
+  right: 20px;
+  bottom: 20px;
   background: #f8d7cf;
   border: 2px solid #e0b1a8;
-  padding: 15px 45px;
+  padding: 15px 35px;
   border-radius: 50px;
   font-size: 1.4rem;
   font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  z-index: 999;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  z-index: 1000;
 }
 
 .primary-action {
   background: var(--green);
   color: white;
   border: none;
-  padding: 20px 70px;
+  padding: 20px 60px;
   border-radius: 15px;
   font-size: 1.8rem;
   cursor: pointer;
@@ -124,8 +126,9 @@ body {
 input#displayName {
   font-size: 1.5rem;
   padding: 15px;
-  width: 300px;
-  margin-bottom: 30px;
-  border-radius: 10px;
+  width: 80%;
+  max-width: 400px;
   border: 2px solid var(--line);
+  border-radius: 10px;
+  margin-bottom: 20px;
 }
