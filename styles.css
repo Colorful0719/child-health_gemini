@@ -1,15 +1,18 @@
-:root {
-  --ink: #24313d; --muted: #66727d; --line: #d8e1e8; --paper: #fffdf7;
-  --green: #2c7a5b; --blue: #dcebf7;
-  font-family: system-ui, sans-serif;
-}
-body { margin: 0; background: var(--paper); color: var(--ink); }
-.app-shell { width: min(800px, 90%); margin: 0 auto; padding: 40px 0; text-align: center; }
+:root { --green: #2c7a5b; --line: #d8e1e8; }
+body { font-family: sans-serif; background: #fffdf7; margin: 0; }
+.app-shell { width: min(800px, 95%); margin: 0 auto; padding: 20px; text-align: center; }
 .hidden { display: none !important; }
-.option-card { border: 2px solid var(--line); border-radius: 12px; padding: 20px; background: white; cursor: pointer; transition: 0.2s; }
+.eyebrow { color: var(--green); font-weight: bold; margin-bottom: 5px; }
+.brand-row { margin-bottom: 20px; }
+.mark { width: 50px; height: 50px; background: var(--green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 24px; }
+.option-card { border: 2px solid var(--line); border-radius: 12px; padding: 15px; background: white; width: 45%; cursor: pointer; transition: 0.2s; }
 .option-card:hover { border-color: var(--green); transform: translateY(-2px); }
-.option-card img { width: 150px; height: 150px; object-fit: contain; display: block; margin: 0 auto 10px; }
-.quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 30px 0; }
-.primary-action { background: var(--green); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1.2rem; }
-.secondary-action { background: none; border: 1px solid var(--line); padding: 10px 20px; border-radius: 8px; margin-left: 10px; }
-.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+.quiz-options { display: flex; justify-content: space-around; margin: 20px 0; }
+.label-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; font-size: 1.2rem; font-weight: bold; }
+.audio-btn { width: 35px; height: 35px; border-radius: 50%; border: 1px solid var(--green); background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.audio-btn:hover { background: var(--green); color: white; }
+.replay-btn { background: #dcebf7; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; margin-bottom: 15px; }
+.unknown-button { background: #f8d7cf; border: 1px solid #d8e1e8; padding: 10px 30px; border-radius: 8px; cursor: pointer; font-size: 1rem; }
+.primary-action { background: var(--green); color: white; border: none; padding: 15px 40px; border-radius: 8px; font-size: 1.2rem; cursor: pointer; }
+img { width: 100%; height: 200px; object-fit: contain; border-radius: 8px; }
+input { width: 80%; padding: 12px; margin-bottom: 20px; border: 1px solid var(--line); border-radius: 8px; }
