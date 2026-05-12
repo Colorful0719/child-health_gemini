@@ -65,23 +65,28 @@ function renderQuestion() {
   document.getElementById("labelA").textContent = q[3];
   document.getElementById("labelB").textContent = q[4];
 
-  document.getElementById("optionA").onclick = (e) => { if (!e.target.closest('.audio-btn')) handleAnswer(q[3]); };
-  document.getElementById("optionB").onclick = (e) => { if (!e.target.closest('.audio-btn')) handleAnswer(q[4]); };
+  // 選項點擊 (排除按到播放鈕)
+  document.getElementById("optionA").onclick = (e) => { if (!e.target.closest('.option-audio')) handleAnswer(q[3]); };
+  document.getElementById("optionB").onclick = (e) => { if (!e.target.closest('.option-audio')) handleAnswer(q[4]); };
+  
+  // 播放鈕單獨播放
   document.getElementById("audioA").onclick = (e) => { e.stopPropagation(); speak(q[3]); };
   document.getElementById("audioB").onclick = (e) => { e.stopPropagation(); speak(q[4]); };
 
   setTimeout(() => { speak(q[2] + "。" + q[3] + "。" + q[4]); }, 200);
 }
 
-function handleAnswer(ans) {
-  state.answers.push({ q: questions[state.index][2], a: ans });
-  if (state.index < questions.length - 1) { state.index++; renderQuestion(); }
-  else {
+function handleAnswer(ansLabel) {
+  state.answers.push({ q: questions[state.index][2], a: ansLabel });
+  if (state.index < questions.length - 1) {
+    state.index++;
+    renderQuestion();
+  } else {
     document.getElementById("quizView").classList.add("hidden");
     document.getElementById("doneView").classList.remove("hidden");
-    speak("完成囉！");
+    speak("太棒了！完成囉！");
     const formData = new FormData();
-    formData.append(ENTRY_ID_NAME, state.displayName);
+    formData.append(ENTRY_ID_NAME, state.displayName || "匿名");
     formData.append(ENTRY_ID_DATA, JSON.stringify(state.answers));
     fetch("https://docs.google.com/forms/d/e/" + FORM_ID + "/formResponse", { method: "POST", mode: "no-cors", body: formData });
   }
@@ -89,12 +94,12 @@ function handleAnswer(ans) {
 
 window.onload = () => {
   document.getElementById("startButton").onclick = () => {
-    state.displayName = document.getElementById("displayName").value || "匿名";
+    state.displayName = document.getElementById("displayName").value.trim();
     document.getElementById("welcomeView").classList.add("hidden");
     document.getElementById("quizView").classList.remove("hidden");
     renderQuestion();
   };
   document.getElementById("replayButton").onclick = () => renderQuestion();
   document.getElementById("unknownButton").onclick = () => handleAnswer("不知道");
-  document.getElementById("restartButton").onclick = () => location.reload();
+  document.getElementById("restartButton").onclick = () => window.location.reload();
 };
