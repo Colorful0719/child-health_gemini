@@ -18,24 +18,30 @@
             <header class="quiz-header">
                 <p id="categoryLabel"></p>
                 <h2 id="questionPrompt"></h2>
-                <button class="replay-btn" id="replayButton">🔊 重聽題目</button>
+                <button class="replay-btn" id="replayButton" type="button">🔊 重聽題目</button>
             </header>
             <div class="quiz-options">
-                <button class="option-card" id="optionA">
-                    <img id="imageA" src="" alt="">
-                    <div class="label-row"><span id="labelA"></span><button class="audio-btn" id="audioA">▶</button></div>
+                <button class="option-card" id="optionA" type="button">
+                    <img id="imageA" src="" alt="選項一">
+                    <div class="label-row">
+                        <span id="labelA"></span>
+                        <button class="audio-btn" id="audioA" type="button">▶</button>
+                    </div>
                 </button>
-                <button class="option-card" id="optionB">
-                    <img id="imageB" src="" alt="">
-                    <div class="label-row"><span id="labelB"></span><button class="audio-btn" id="audioB">▶</button></div>
+                <button class="option-card" id="optionB" type="button">
+                    <img id="imageB" src="" alt="選項二">
+                    <div class="label-row">
+                        <span id="labelB"></span>
+                        <button class="audio-btn" id="audioB" type="button">▶</button>
+                    </div>
                 </button>
             </div>
-            <button class="unknown-button" id="unknownButton">不知道</button>
+            <button class="unknown-button" id="unknownButton" type="button">不知道</button>
         </section>
 
         <section class="hidden" id="doneView">
             <h2>完成作答！</h2>
-            <button class="primary-action" id="restartButton">重新開始</button>
+            <button class="primary-action" id="restartButton" type="button">重新開始</button>
         </section>
     </main>
     <script src="app.js"></script>
