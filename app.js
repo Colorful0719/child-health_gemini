@@ -4,7 +4,7 @@ const ENTRY_ID_NAME = "entry.111555726";
 const ENTRY_ID_DATA = "entry.2065308468"; 
 // ----------------------------------------------
 
-// 根據 Word 檔案內容對應的 42 題完整資料
+// 完整 42 題資料
 const questions = [
   ["h1", "衛生", "吃完飯後，我會...?", "飯後刷牙", "吃完直接玩玩具", "a", 1, 2],
   ["h2", "衛生", "睡覺前，我會...?", "洗澡", "髒髒的去睡覺", "a", 3, 4],
@@ -50,12 +50,11 @@ const questions = [
   ["s15", "安全", "如果我不小心受傷流血了，我會…", "受傷了找大人幫忙", "自己躲起來哭", "a", 83, 84]
 ].map(([id, category, prompt, a, b, correctOption, imgA, imgB], idx) => ({
   id,
-  number: idx + 1,
   category,
   prompt,
-  correctOption,
   order: idx % 2 === 0 ? ["a", "b"] : ["b", "a"],
   options: {
+    // 這裡使用相對路徑並確保檔名格式正確
     a: { key: "a", label: a, image: `assets/image${imgA}.png` },
     b: { key: "b", label: b, image: `assets/image${imgB}.png` }
   }
@@ -64,9 +63,7 @@ const questions = [
 const state = {
   index: 0,
   answers: [],
-  id: "",
-  displayName: "",
-  startedAt: null
+  displayName: ""
 };
 
 const els = {
@@ -90,18 +87,12 @@ const els = {
   restartButton: document.getElementById("restartButton")
 };
 
-function show(view) {
-  [els.welcomeView, els.quizView, els.doneView].forEach(v => v.classList.add("hidden"));
-  view.classList.remove("hidden");
-}
-
 function start() {
-  state.id = `KID-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
-  state.displayName = els.displayName.value.trim();
-  state.startedAt = new Date().toISOString();
+  state.displayName = els.displayName.value.trim() || "匿名幼兒";
   state.index = 0;
   state.answers = [];
-  show(els.quizView);
+  els.welcomeView.classList.add("hidden");
+  els.quizView.classList.remove("hidden");
   renderQuestion();
 }
 
@@ -130,58 +121,48 @@ function renderQuestion() {
   els.audioA.onclick = () => speak(optA.label);
   els.audioB.onclick = () => speak(optB.label);
 
-  // 進入題目時，自動連讀題目與選項名稱
   setTimeout(() => {
     speak(`${q.prompt}。${optA.label}。${optB.label}。`);
   }, 100);
 }
 
-async function answer(selectedKey, label) {
+async function answer(key, label) {
   window.speechSynthesis.cancel();
-  state.answers.push({
-    questionId: questions[state.index].id,
-    selected: selectedKey,
-    selectedLabel: label,
-    answeredAt: new Date().toISOString()
-  });
+  state.answers.push({ qId: questions[state.index].id, ans: label });
 
   if (state.index < questions.length - 1) {
     state.index++;
     renderQuestion();
   } else {
-    await finish();
+    finish();
   }
 }
 
 async function finish() {
-  show(els.doneView);
+  els.quizView.classList.add("hidden");
+  els.doneView.classList.remove("hidden");
   speak("太棒了！完成囉！");
+
   const formData = new FormData();
-  formData.append(ENTRY_ID_NAME, state.displayName || state.id);
+  formData.append(ENTRY_ID_NAME, state.displayName);
   formData.append(ENTRY_ID_DATA, JSON.stringify(state.answers));
-  try {
-    await fetch(`https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`, {
-      method: "POST",
-      mode: "no-cors",
-      body: formData
-    });
-  } catch (e) { console.error(e); }
+
+  fetch(`https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`, {
+    method: "POST",
+    mode: "no-cors",
+    body: formData
+  });
 }
 
 function speak(text) {
   window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "zh-TW";
-  utterance.rate = 0.8;
-  window.speechSynthesis.speak(utterance);
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "zh-TW";
+  u.rate = 0.8;
+  window.speechSynthesis.speak(u);
 }
 
-els.startButton.addEventListener("click", start);
-els.restartButton.addEventListener("click", () => window.location.reload());
-els.replayButton.addEventListener("click", () => {
-    const q = questions[state.index];
-    const optA = q.options[q.order[0]];
-    const optB = q.options[q.order[1]];
-    speak(`${q.prompt}。${optA.label}。${optB.label}。`);
-});
-els.unknownButton.addEventListener("click", () => answer("unknown", "不知道"));
+els.startButton.onclick = start;
+els.restartButton.onclick = () => window.location.reload();
+els.replayButton.onclick = () => renderQuestion();
+els.unknownButton.onclick = () => answer("unknown", "不知道");
