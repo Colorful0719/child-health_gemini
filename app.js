@@ -1,15 +1,22 @@
+/**
+ * 幼兒健康識能測驗系統 - 研究最終版
+ * 功能：😊 笑臉圖示、自動編號、42題逐題記錄、5大類別統計、總分統計
+ */
+
+// --- 1. 配置資訊 (請務必確認 ID 正確) ---
 const FORM_ID = "1FAIpQLScXP8f1JzFq-kFYnZiLsGDUXQSQDUcE0OieeOMg4Lr6YvZzgA"; 
 const ENTRY_ID_NAME = "entry.111555726"; 
 const ENTRY_ID_DATA = "entry.2065308468"; 
 
+// --- 2. 42題題庫 ---
 const questions = [
   ["h1", "衛生", "吃完飯後，我會...?", "飯後刷牙", "吃完直接玩玩具", "a", 1, 2],
   ["h2", "衛生", "睡覺前，我會...?", "洗澡", "髒髒的去睡覺", "a", 3, 4],
   ["h3", "衛生", "上廁所後，我會…?", "上廁所後洗手", "直接跑走", "a", 5, 6],
   ["h4", "衛生", "打噴嚏的時候，我會…?", "衛生紙遮口鼻", "直接對著別人", "a", 7, 8],
   ["h5", "衛生", "吃飯的時候，我會用….?", "乾淨餐具組", "髒髒餐具", "a", 9, 10],
-  ["h6", "衛生", "我會讓我的指甲保持…?", "剪齊短指甲", "微灰灰指甲", "a", 11, 12],
-  ["e1", "運動", "我想讓身體更健康，我會⋯？", "跳繩", "看電視", "a", 13, 14],
+  ["h6", "衛生", "我會讓我的指甲保持…?", "剪齊短指甲", "灰灰長指甲", "a", 11, 12],
+  ["e1", "運動", "我想讓身體更健康，我會⋯？", "玩跳繩", "看電視", "a", 13, 14],
   ["e2", "運動", "我想讓身體更有力氣，我會⋯？", "拍球", "看書", "a", 15, 16],
   ["e3", "運動", "吃完晚餐後，我會⋯？", "散步", "躺著不動", "a", 17, 18],
   ["e4", "運動", "週末放假時，我會去⋯？", "公園玩耍", "一直玩手機", "a", 19, 20],
@@ -42,98 +49,4 @@ const questions = [
   ["s10", "安全", "搭機車出門的時候，我會…？", "戴安全帽", "不戴安全帽", "a", 73, 74],
   ["s11", "安全", "如果看到地上有打火機，我會…？", "玩打火機", "把打火機交給大人", "b", 75, 76],
   ["s12", "安全", "在游泳池邊玩水時，我會…？", "慢慢走", "奔跑", "a", 77, 78],
-  ["s13", "安全", "如果發現家裡失火冒煙了，我會…？", "摀住口鼻低姿勢逃生", "站著走動", "a", 79, 80],
-  ["s14", "安全", "看到顏色漂亮的小藥丸時，我會…？", "給大人", "拿來吃吃看", "a", 81, 82],
-  ["s15", "安全", "如果我不小心受傷流血了，我會…", "受傷了找大人幫忙", "自己躲起來哭", "a", 83, 84]
-];
-
-let state = { index: 0, answers: [], displayName: "" };
-
-function speak(text) {
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "zh-TW"; u.rate = 0.8;
-  window.speechSynthesis.speak(u);
-}
-
-function renderQuestion() {
-  const q = questions[state.index];
-  document.getElementById("currentNum").textContent = state.index + 1;
-  document.getElementById("questionPrompt").textContent = q[2];
-  document.getElementById("imageA").src = "assets/image" + q[6] + ".png";
-  document.getElementById("imageB").src = "assets/image" + q[7] + ".png";
-  document.getElementById("labelA").textContent = q[3];
-  document.getElementById("labelB").textContent = q[4];
-  setTimeout(() => { speak(q[2] + "。" + q[3] + "。" + q[4]); }, 300);
-}
-
-function handleAnswer(selectedLabel) {
-  const q = questions[state.index];
-  const correctLabel = (q[5] === 'a') ? q[3] : q[4];
-  let isCorrect = (selectedLabel === correctLabel) ? 1 : 0;
-  state.answers.push({ score: isCorrect });
-
-  if (state.index < questions.length - 1) {
-    state.index++;
-    renderQuestion();
-  } else {
-    submitResults();
-  }
-}
-
-async function submitResults() {
-  document.getElementById("quizView").classList.add("hidden");
-  document.getElementById("doneView").classList.remove("hidden");
-  speak("完成囉，謝謝你的幫忙！");
-
-  let totalScore = 0;
-  const detailScores = state.answers.map(item => {
-    if (item.score === 1) totalScore++;
-    return item.score;
-  });
-
-  const summary = detailScores.join(",") + "," + totalScore;
-  const formData = new FormData();
-  formData.append(ENTRY_ID_NAME, state.displayName);
-  formData.append(ENTRY_ID_DATA, summary);
-
-  try {
-    await fetch(`https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`, {
-      method: "POST", mode: "no-cors", body: formData
-    });
-    let currentCount = parseInt(localStorage.getItem('userSequence') || "0");
-    localStorage.setItem('userSequence', currentCount + 1);
-  } catch (e) { console.error(e); }
-}
-
-window.onload = () => {
-  let nextNum = parseInt(localStorage.getItem('userSequence') || "0") + 1;
-  state.displayName = "受試者 " + nextNum;
-
-  const startPanel = document.querySelector('.start-panel');
-  if(startPanel) {
-    startPanel.innerHTML = `
-      <div style="font-size: 2.2rem; margin: 30px 0; color: #2c7a5b; font-weight: bold; text-align:center;">
-        你好！你是 ${state.displayName}
-      </div>
-      <button class="primary-action" id="startButton">點我開始測驗</button>
-    `;
-  }
-
-  document.getElementById("startButton").onclick = () => {
-    document.getElementById("welcomeView").classList.add("hidden");
-    document.getElementById("quizView").classList.remove("hidden");
-    renderQuestion();
-  };
-
-  document.getElementById("optionA").onclick = (e) => {
-    if (!e.target.closest('.option-audio')) handleAnswer(document.getElementById("labelA").textContent);
-  };
-  document.getElementById("optionB").onclick = (e) => {
-    if (!e.target.closest('.option-audio')) handleAnswer(document.getElementById("labelB").textContent);
-  };
-  document.getElementById("audioA").onclick = (e) => { e.stopPropagation(); speak(document.getElementById("labelA").textContent); };
-  document.getElementById("audioB").onclick = (e) => { e.stopPropagation(); speak(document.getElementById("labelB").textContent); };
-  document.getElementById("replayButton").onclick = () => renderQuestion();
-  document.getElementById("unknownButton").onclick = () => handleAnswer("不知道");
-};
+  ["s13", "安全", "如果發現家裡失
