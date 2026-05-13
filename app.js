@@ -4,7 +4,7 @@ const ENTRY_ID_DATA = "entry.2065308468";
 
 const questions = [
   ["h1", "衛生", "吃完飯後，我會...?", "飯後刷牙", "吃完直接玩玩具", "a", 1, 2],
-  ["h2", "衛生", "睡覺前，我會...?", "洗澡", "髒髒的去睡覺", "a", 3, 4],
+  ["h2", "衛生", "睡覺前，我會...?", "洗澡", "髒幫的去睡覺", "a", 3, 4],
   ["h3", "衛生", "上廁所後，我會…?", "上廁所後洗手", "直接跑走", "a", 5, 6],
   ["h4", "衛生", "打噴嚏的時候，我會…?", "衛生紙遮口鼻", "直接對著別人", "a", 7, 8],
   ["h5", "衛生", "吃飯的時候，我會用….?", "乾淨餐具組", "髒髒餐具", "a", 9, 10],
@@ -70,8 +70,8 @@ function renderQuestion() {
 function handleAnswer(selectedLabel) {
   const q = questions[state.index];
   const correctLabel = (q[5] === 'a') ? q[3] : q[4];
-  let isCorrect = (selectedLabel === correctLabel) ? 1 : 0;
-  state.answers.push({ score: isCorrect });
+  let score = (selectedLabel === correctLabel) ? 1 : 0;
+  state.answers.push({ score: score });
   if (state.index < questions.length - 1) { state.index++; renderQuestion(); } else { submitResults(); }
 }
 
@@ -83,10 +83,10 @@ async function submitResults() {
   let catScore = { h: 0, e: 0, n: 0, v: 0, s: 0 };
   let totalScore = 0;
   const detailScores = state.answers.map((item, i) => {
-    const score = item.score;
+    const s = item.score;
     const cat = questions[i][0].charAt(0);
-    if (score === 1) { totalScore++; if (catScore[cat] !== undefined) catScore[cat]++; }
-    return score;
+    if (s === 1) { totalScore++; if (catScore[cat] !== undefined) catScore[cat]++; }
+    return s;
   });
 
   const summary = [...detailScores, catScore.h, catScore.e, catScore.n, catScore.v, catScore.s, totalScore].join(",");
@@ -95,22 +95,23 @@ async function submitResults() {
   formData.append(ENTRY_ID_DATA, summary);
 
   try {
-    await fetch(`https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`, { method: "POST", mode: "no-cors", body: formData });
-    localStorage.setItem('userSequence', parseInt(localStorage.getItem('userSequence') || "0") + 1);
+    await fetch(`https://docs.google.com/forms/e/1FAIpQLScXP8f1JzFq-kFYnZiLsGDUXQSQDUcE0OieeOMg4Lr6YvZzgA/formResponse`, { method: "POST", mode: "no-cors", body: formData });
   } catch (e) { console.error(e); }
 }
 
 window.onload = () => {
-  let nextNum = parseInt(localStorage.getItem('userSequence') || "0") + 1;
-  state.displayName = "受試者 " + nextNum;
-  document.querySelector('.start-panel').innerHTML = `
-    <h2 style="text-align:center;">你好！你是 ${state.displayName}</h2>
-    <button class="primary-action" id="startButton">點我開始測驗</button>`;
-  document.getElementById("startButton").onclick = () => {
+  const startButton = document.getElementById("startButton");
+  const userNameInput = document.getElementById("userNameInput");
+
+  startButton.onclick = () => {
+    const inputValue = userNameInput.value.trim();
+    if (inputValue === "") { alert("請先輸入編碼再開始喔！"); return; }
+    state.displayName = inputValue;
     document.getElementById("welcomeView").classList.add("hidden");
     document.getElementById("quizView").classList.remove("hidden");
     renderQuestion();
   };
+
   document.getElementById("optionA").onclick = (e) => { if (!e.target.closest('.option-audio')) handleAnswer(document.getElementById("labelA").textContent); };
   document.getElementById("optionB").onclick = (e) => { if (!e.target.closest('.option-audio')) handleAnswer(document.getElementById("labelB").textContent); };
   document.getElementById("audioA").onclick = (e) => { e.stopPropagation(); speak(document.getElementById("labelA").textContent); };
