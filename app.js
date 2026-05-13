@@ -72,87 +72,52 @@ function renderQuestion() {
 
 function handleAnswer(selectedLabel) {
   const q = questions[state.index];
-  // 判定正確答案文字
   const correctLabel = (q[5] === 'a') ? q[3] : q[4];
-  let status = "";
-  let scoreValue = 0;
+  let isCorrect = 0;
 
-  if (selectedLabel === "不知道") {
-    status = "不知道";
-    scoreValue = 0;
-  } else if (selectedLabel === correctLabel) {
-    status = "正確";
-    scoreValue = 1;
-  } else {
-    status = "錯誤";
-    scoreValue = 0;
-  }
+  if (selectedLabel === correctLabel) isCorrect = 1;
 
-  // 紀錄資料
-  state.answers.push({
-    id: q[0],        // 題號(如h1)
-    cat: q[1],       // 面向(如衛生)
-    q: q[2],         // 題目文字
-    ans: selectedLabel, // 幼兒選的選項
-    status: status,  // 正確/錯誤/不知道
-    score: scoreValue // 1或0
-  });
+  state.answers.push({ cat: q[1], score: isCorrect });
 
   if (state.index < questions.length - 1) {
     state.index++;
     renderQuestion();
   } else {
-    finishQuiz();
+    submitResults();
   }
 }
 
-function finishQuiz() {
+function submitResults() {
   document.getElementById("quizView").classList.add("hidden");
   document.getElementById("doneView").classList.remove("hidden");
   speak("完成囉，謝謝你的幫忙！");
 
-  // --- 計算計分系統 ---
-  const report = { "衛生": 0, "運動": 0, "營養": 0, "視力": 0, "安全": 0, "總分": 0 };
-  
+  // 計算五大面向分數
+  const scores = { "衛生": 0, "運動": 0, "營養": 0, "視力": 0, "安全": 0, "總計": 0 };
   state.answers.forEach(item => {
     if (item.score === 1) {
-      report[item.cat]++;
-      report["總分"]++;
+      scores[item.cat]++;
+      scores["總計"]++;
     }
   });
 
-  // --- 格式化匯出字串 ---
-  const resultText = `
-【受試者】：${state.displayName}
-【總答對數】：${report["總分"]} / 42
+  // 格式化為逗號分隔字串，供試算表 SPLIT 使用
+  // 格式: SCORE:衛生,運動,營養,視力,安全,總計
+  const summaryForSheet = `SCORE:${scores["衛生"]},${scores["運動"]},${scores["營養"]},${scores["視力"]},${scores["安全"]},${scores["總計"]}`;
 
-【面向得分統計】：
-1. 衛生：${report["衛生"]} / 6
-2. 運動：${report["運動"]} / 6
-3. 營養：${report["營養"]} / 9
-4. 視力：${report["視力"]} / 6
-5. 安全：${report["安全"]} / 15
-
-【詳細對錯清單】：
-${state.answers.map((a, i) => `${i+1}. [${a.cat}] ${a.q} -> 選項: ${a.ans} (${a.status})`).join('\n')}
-  `.trim();
-
-  // --- 送出至 Google 表單 ---
   const formData = new FormData();
   formData.append(ENTRY_ID_NAME, state.displayName || "匿名");
-  formData.append(ENTRY_ID_DATA, resultText);
+  formData.append(ENTRY_ID_DATA, summaryForSheet);
 
   fetch("https://docs.google.com/forms/d/e/" + FORM_ID + "/formResponse", {
-    method: "POST",
-    mode: "no-cors",
-    body: formData
+    method: "POST", mode: "no-cors", body: formData
   });
 }
 
 window.onload = () => {
   document.getElementById("startButton").onclick = () => {
     state.displayName = document.getElementById("displayName").value.trim();
-    if(!state.displayName) { alert("請輸入姓名"); return; }
+    if (!state.displayName) return alert("請輸入姓名");
     document.getElementById("welcomeView").classList.add("hidden");
     document.getElementById("quizView").classList.remove("hidden");
     renderQuestion();
