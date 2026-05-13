@@ -1,7 +1,9 @@
+// --- 配置資訊：請務必確認這三項與你的 Google 表單一致 ---
 const FORM_ID = "1FAIpQLScXP8f1JzFq-kFYnZiLsGDUXQSQDUcE0OieeOMg4Lr6YvZzgA"; 
 const ENTRY_ID_NAME = "entry.111555726"; 
 const ENTRY_ID_DATA = "entry.2065308468"; 
 
+// --- 題目資料庫 (共 42 題) ---
 const questions = [
   ["h1", "衛生", "吃完飯後，我會...?", "飯後刷牙", "吃完直接玩玩具", "a", 1, 2],
   ["h2", "衛生", "睡覺前，我會...?", "洗澡", "髒髒的去睡覺", "a", 3, 4],
@@ -44,11 +46,12 @@ const questions = [
   ["s12", "安全", "在游泳池邊玩水時，我會…？", "慢慢走", "奔跑", "a", 77, 78],
   ["s13", "安全", "如果發現家裡失火冒煙了，我會…？", "摀住口鼻低姿勢逃生", "站著走動", "a", 79, 80],
   ["s14", "安全", "看到顏色漂亮的小藥丸時，我會…？", "給大人", "拿來吃吃看", "a", 81, 82],
-  ["s15", "安全", "如果我不小心受傷流血了，我會…", "受傷了找大人幫忙", "自己躲起來哭", "a", 83, 84]
+  ["s15", "安全", "如果我不小心受傷流血了，我會…", "受幫忙", "自己躲起來哭", "a", 83, 84]
 ];
 
 let state = { index: 0, answers: [], displayName: "" };
 
+// --- 語音功能 ---
 function speak(text) {
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
@@ -56,26 +59,28 @@ function speak(text) {
   window.speechSynthesis.speak(u);
 }
 
+// --- 顯示題目 ---
 function renderQuestion() {
   const q = questions[state.index];
   document.getElementById("currentNum").textContent = state.index + 1;
   document.getElementById("categoryLabel").textContent = q[1];
   document.getElementById("questionPrompt").textContent = q[2];
   
+  // 圖片路徑 assets/image#.png
   document.getElementById("imageA").src = "assets/image" + q[6] + ".png";
   document.getElementById("imageB").src = "assets/image" + q[7] + ".png";
   document.getElementById("labelA").textContent = q[3];
   document.getElementById("labelB").textContent = q[4];
 
+  // 語音連讀
   setTimeout(() => { speak(q[2] + "。" + q[3] + "。" + q[4]); }, 300);
 }
 
+// --- 處理作答 ---
 function handleAnswer(selectedLabel) {
   const q = questions[state.index];
   const correctLabel = (q[5] === 'a') ? q[3] : q[4];
-  let isCorrect = 0;
-
-  if (selectedLabel === correctLabel) isCorrect = 1;
+  let isCorrect = (selectedLabel === correctLabel) ? 1 : 0;
 
   state.answers.push({ cat: q[1], score: isCorrect });
 
@@ -87,12 +92,14 @@ function handleAnswer(selectedLabel) {
   }
 }
 
-function submitResults() {
+// --- 送出資料至 Google Form ---
+async function submitResults() {
+  // 先切換 UI
   document.getElementById("quizView").classList.add("hidden");
   document.getElementById("doneView").classList.remove("hidden");
   speak("完成囉，謝謝你的幫忙！");
 
-  // 計算五大面向分數
+  // 計算分數
   const scores = { "衛生": 0, "運動": 0, "營養": 0, "視力": 0, "安全": 0, "總計": 0 };
   state.answers.forEach(item => {
     if (item.score === 1) {
@@ -101,35 +108,56 @@ function submitResults() {
     }
   });
 
-  // 格式化為逗號分隔字串，供試算表 SPLIT 使用
-  // 格式: SCORE:衛生,運動,營養,視力,安全,總計
-  const summaryForSheet = `SCORE:${scores["衛生"]},${scores["運動"]},${scores["營養"]},${scores["視力"]},${scores["安全"]},${scores["總計"]}`;
+  // 封裝格式 SCORE:衛生,運動,營養,視力,安全,總計
+  const summary = `SCORE:${scores["衛生"]},${scores["運動"]},${scores["營養"]},${scores["視力"]},${scores["安全"]},${scores["總計"]}`;
 
   const formData = new FormData();
   formData.append(ENTRY_ID_NAME, state.displayName || "匿名");
-  formData.append(ENTRY_ID_DATA, summaryForSheet);
+  formData.append(ENTRY_ID_DATA, summary);
 
-  fetch("https://docs.google.com/forms/d/e/" + FORM_ID + "/formResponse", {
-    method: "POST", mode: "no-cors", body: formData
-  });
+  try {
+    await fetch(`https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`, {
+      method: "POST",
+      mode: "no-cors",
+      body: formData
+    });
+    console.log("Submit successful (no-cors mode)");
+  } catch (e) {
+    console.error("Submit error:", e);
+  }
 }
 
+// --- 事件綁定 ---
 window.onload = () => {
   document.getElementById("startButton").onclick = () => {
     state.displayName = document.getElementById("displayName").value.trim();
-    if (!state.displayName) return alert("請輸入姓名");
+    if (!state.displayName) {
+        alert("請輸入姓名再開始喔！");
+        return;
+    }
     document.getElementById("welcomeView").classList.add("hidden");
     document.getElementById("quizView").classList.remove("hidden");
     renderQuestion();
   };
+
+  // 處理選項點擊
   document.getElementById("optionA").onclick = (e) => {
     if (!e.target.closest('.option-audio')) handleAnswer(document.getElementById("labelA").textContent);
   };
   document.getElementById("optionB").onclick = (e) => {
     if (!e.target.closest('.option-audio')) handleAnswer(document.getElementById("labelB").textContent);
   };
-  document.getElementById("audioA").onclick = (e) => { e.stopPropagation(); speak(document.getElementById("labelA").textContent); };
-  document.getElementById("audioB").onclick = (e) => { e.stopPropagation(); speak(document.getElementById("labelB").textContent); };
+
+  // 處理語音按鈕
+  document.getElementById("audioA").onclick = (e) => { 
+    e.stopPropagation(); 
+    speak(document.getElementById("labelA").textContent); 
+  };
+  document.getElementById("audioB").onclick = (e) => { 
+    e.stopPropagation(); 
+    speak(document.getElementById("labelB").textContent); 
+  };
+
   document.getElementById("replayButton").onclick = () => renderQuestion();
   document.getElementById("unknownButton").onclick = () => handleAnswer("不知道");
 };
