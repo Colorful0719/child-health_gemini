@@ -2,10 +2,8 @@
   --ink: #24313d;
   --muted: #66727d;
   --line: #d8e1e8;
-  --paper: #fffdf7;
-  --blue: #dcebf7;
-  --coral: #f8d7cf;
   --green: #2c7a5b;
+  --coral: #f8d7cf;
   --focus: #1d6fb8;
   font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
 }
@@ -21,7 +19,6 @@ body {
 .app-shell {
   width: min(1120px, 100% - 32px);
   padding: 20px 0;
-  position: relative;
 }
 
 .hidden { display: none !important; }
@@ -43,16 +40,13 @@ body {
   font-size: 40px;
 }
 
-.quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.quiz-header { display: flex; justify-content: space-between; align-items: center; }
 .counter { font-size: 1.8rem; font-weight: 800; color: var(--muted); }
-.category-tag { background: var(--blue); padding: 5px 15px; border-radius: 50px; color: var(--focus); font-weight: bold; }
-h2 { font-size: 2.2rem; color: var(--ink); margin: 10px 0; }
 
 .options-grid {
   display: grid !important;
-  grid-template-columns: 1fr 1fr !important; /* 強制左右並排 */
+  grid-template-columns: 1fr 1fr !important;
   gap: 25px;
-  margin-top: 20px;
 }
 
 .picture-option {
@@ -61,36 +55,44 @@ h2 { font-size: 2.2rem; color: var(--ink); margin: 10px 0; }
   border-radius: 15px;
   padding: 20px;
   cursor: pointer;
-  transition: transform 0.2s;
 }
-
-.picture-option:hover { transform: translateY(-5px); border-color: var(--green); }
 
 .image-frame {
   width: 100%;
-  height: 45vh;
+  height: 40vh;
   display: flex; justify-content: center; align-items: center;
-  overflow: hidden;
 }
 
 .image-frame img {
   max-width: 100%;
   max-height: 100%;
-  object-fit: contain !important; /* 不裁切圖片 */
+  object-fit: contain !important;
 }
 
 .option-caption { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; }
-.option-label { font-size: 1.8rem; font-weight: 900; color: var(--ink); }
+.option-label { font-size: 1.8rem; font-weight: 900; }
 .option-audio { width: 55px; height: 55px; border-radius: 50%; border: 0; background: var(--green); color: white; font-size: 24px; cursor: pointer; }
 
-.unknown-button { position: fixed; left: 30px; bottom: 30px; background: var(--coral); border: 0; padding: 15px 40px; border-radius: 50px; font-size: 1.5rem; font-weight: bold; color: var(--ink); cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+/* 不知道按鈕固定在右下角 */
+.unknown-button {
+  position: fixed;
+  right: 30px;
+  bottom: 30px;
+  background: var(--coral);
+  border: 2px solid var(--line);
+  padding: 15px 40px;
+  border-radius: 50px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 100;
+}
 
 .primary-action { background: var(--green); color: white; border: 0; padding: 20px; border-radius: 12px; font-size: 1.8rem; font-weight: bold; cursor: pointer; width: 100%; }
 
-.done-symbol { font-size: 5rem; color: var(--green); margin-bottom: 20px; }
+.footer-brand { text-align: center; margin-top: 30px; font-size: 0.9rem; color: var(--muted); }
 
 @media (max-width: 768px) {
   .options-grid { grid-template-columns: 1fr 1fr !important; }
-  h2 { font-size: 1.5rem; }
   .image-frame { height: 30vh; }
 }
