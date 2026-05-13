@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>幼兒健康圖像式問卷</title>
+    <title>幼兒健康識能測驗</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -14,20 +14,16 @@
                 <h1>幼兒健康問卷</h1>
             </div>
             <div class="start-panel">
-                <div id="statusArea"></div>
-                <button class="primary-action" id="startButton">點我開始</button>
-            </div>
+                </div>
         </section>
 
         <section id="quizView" class="quiz-view hidden">
             <header class="quiz-header">
                 <div class="counter"><span id="currentNum">1</span> / 42</div>
-                <div class="title-area">
-                    <h2 id="questionPrompt">載入中...</h2>
-                    <span id="categoryLabel" class="category-tag"></span>
-                </div>
                 <button class="replay-btn" id="replayButton" type="button">🔊 重聽題目</button>
             </header>
+
+            <h2 id="questionPrompt" style="text-align:center; margin: 20px 0;">載入中...</h2>
 
             <div class="options-grid">
                 <div class="picture-option" id="optionA">
@@ -56,10 +52,10 @@
         </section>
 
         <section id="doneView" class="quiz-view hidden" style="text-align:center;">
-            <div class="done-symbol">✓</div>
+            <div style="font-size: 5rem; margin-bottom: 20px;">✅</div>
             <h2>完成作答！</h2>
-            <p style="font-size:1.5rem; color:#66727d; margin:20px 0;">謝謝你的幫忙，資料已經成功送出。</p>
-            <button class="primary-action" onclick="location.reload()">返回首頁</button>
+            <p style="font-size:1.5rem; color:#66727d;">謝謝你的幫忙，資料已經送出。</p>
+            <button class="primary-action" onclick="location.reload()" style="margin-top:30px;">返回首頁</button>
         </section>
     </main>
     <script src="app.js"></script>
