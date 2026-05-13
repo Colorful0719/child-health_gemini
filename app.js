@@ -1,14 +1,7 @@
-/**
- * 幼兒健康識能測驗系統 - 研究用完整版
- * 功能：😊 笑臉圖示、自動編號、42題逐題對錯記錄、自動計算總分
- */
-
-// --- 1. 配置資訊 (請確認與你的 Google 表單對齊) ---
 const FORM_ID = "1FAIpQLScXP8f1JzFq-kFYnZiLsGDUXQSQDUcE0OieeOMg4Lr6YvZzgA"; 
-const ENTRY_ID_NAME = "entry.111555726"; // 對應試算表「姓名/編號」欄位
-const ENTRY_ID_DATA = "entry.2065308468"; // 對應試算表「資料摘要」欄位
+const ENTRY_ID_NAME = "entry.111555726"; 
+const ENTRY_ID_DATA = "entry.2065308468"; 
 
-// --- 2. 題目資料庫 (42題) ---
 const questions = [
   ["h1", "衛生", "吃完飯後，我會...?", "飯後刷牙", "吃完直接玩玩具", "a", 1, 2],
   ["h2", "衛生", "睡覺前，我會...?", "洗澡", "髒髒的去睡覺", "a", 3, 4],
@@ -54,44 +47,29 @@ const questions = [
   ["s15", "安全", "如果我不小心受傷流血了，我會…", "受傷了找大人幫忙", "自己躲起來哭", "a", 83, 84]
 ];
 
-// --- 3. 狀態控制 ---
 let state = { index: 0, answers: [], displayName: "" };
 
-// --- 4. 語音功能 ---
 function speak(text) {
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = "zh-TW";
-  u.rate = 0.8;
+  u.lang = "zh-TW"; u.rate = 0.8;
   window.speechSynthesis.speak(u);
 }
 
-// --- 5. 渲染題目 ---
 function renderQuestion() {
   const q = questions[state.index];
   document.getElementById("currentNum").textContent = state.index + 1;
-  document.getElementById("categoryLabel").textContent = q[1];
   document.getElementById("questionPrompt").textContent = q[2];
-  
-  // 圖片路徑 assets/image1.png ...
   document.getElementById("imageA").src = "assets/image" + q[6] + ".png";
   document.getElementById("imageB").src = "assets/image" + q[7] + ".png";
-  
   document.getElementById("labelA").textContent = q[3];
   document.getElementById("labelB").textContent = q[4];
-  
-  // 自動播放語音
-  setTimeout(() => { 
-    speak(q[2] + "。" + q[3] + "。" + q[4]); 
-  }, 300);
+  setTimeout(() => { speak(q[2] + "。" + q[3] + "。" + q[4]); }, 300);
 }
 
-// --- 6. 處理回答 ---
 function handleAnswer(selectedLabel) {
   const q = questions[state.index];
   const correctLabel = (q[5] === 'a') ? q[3] : q[4];
-  
-  // 記錄 1 (對) 或 0 (錯)
   let isCorrect = (selectedLabel === correctLabel) ? 1 : 0;
   state.answers.push({ score: isCorrect });
 
@@ -103,63 +81,45 @@ function handleAnswer(selectedLabel) {
   }
 }
 
-// --- 7. 送出數據至 Google 表單 ---
 async function submitResults() {
-  // 顯示結束畫面
   document.getElementById("quizView").classList.add("hidden");
   document.getElementById("doneView").classList.remove("hidden");
   speak("完成囉，謝謝你的幫忙！");
 
-  // 計算每一題的 0/1 序列與總分
   let totalScore = 0;
   const detailScores = state.answers.map(item => {
     if (item.score === 1) totalScore++;
     return item.score;
   });
 
-  // 封裝格式： 1,0,1,1... (共42個) , 總得分
   const summary = detailScores.join(",") + "," + totalScore;
-
   const formData = new FormData();
   formData.append(ENTRY_ID_NAME, state.displayName);
   formData.append(ENTRY_ID_DATA, summary);
 
   try {
     await fetch(`https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`, {
-      method: "POST",
-      mode: "no-cors",
-      body: formData
+      method: "POST", mode: "no-cors", body: formData
     });
-    // 成功後，將本地端的流水號編號 +1
     let currentCount = parseInt(localStorage.getItem('userSequence') || "0");
     localStorage.setItem('userSequence', currentCount + 1);
-  } catch (e) {
-    console.error("提交失敗", e);
-  }
+  } catch (e) { console.error(e); }
 }
 
-// --- 8. 初始化事件 ---
 window.onload = () => {
-  // A. 修改圖示為笑臉 😊
-  const mark = document.querySelector('.mark');
-  if(mark) mark.textContent = "😊";
-
-  // B. 自動生成受試者編號
   let nextNum = parseInt(localStorage.getItem('userSequence') || "0") + 1;
   state.displayName = "受試者 " + nextNum;
 
-  // C. 修改歡迎畫面顯示編號
   const startPanel = document.querySelector('.start-panel');
   if(startPanel) {
     startPanel.innerHTML = `
-      <div style="font-size: 2.2rem; margin: 30px 0; color: #2c7a5b; font-weight: bold;">
+      <div style="font-size: 2.2rem; margin: 30px 0; color: #2c7a5b; font-weight: bold; text-align:center;">
         你好！你是 ${state.displayName}
       </div>
-      <button class="primary-action" id="startButton" style="width: 100%; padding: 20px;">點我開始測驗</button>
+      <button class="primary-action" id="startButton">點我開始測驗</button>
     `;
   }
 
-  // D. 綁定按鈕事件
   document.getElementById("startButton").onclick = () => {
     document.getElementById("welcomeView").classList.add("hidden");
     document.getElementById("quizView").classList.remove("hidden");
@@ -172,20 +132,8 @@ window.onload = () => {
   document.getElementById("optionB").onclick = (e) => {
     if (!e.target.closest('.option-audio')) handleAnswer(document.getElementById("labelB").textContent);
   };
-  
-  // 點擊小喇叭單獨播音
-  document.getElementById("audioA").onclick = (e) => { 
-    e.stopPropagation(); 
-    speak(document.getElementById("labelA").textContent); 
-  };
-  document.getElementById("audioB").onclick = (e) => { 
-    e.stopPropagation(); 
-    speak(document.getElementById("labelB").textContent); 
-  };
-  
-  // 重聽題目
+  document.getElementById("audioA").onclick = (e) => { e.stopPropagation(); speak(document.getElementById("labelA").textContent); };
+  document.getElementById("audioB").onclick = (e) => { e.stopPropagation(); speak(document.getElementById("labelB").textContent); };
   document.getElementById("replayButton").onclick = () => renderQuestion();
-  
-  // 不知道按鈕
   document.getElementById("unknownButton").onclick = () => handleAnswer("不知道");
 };
