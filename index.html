@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>幼兒健康識能測驗系統</title>
+    <title>幼兒健康識能測驗</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -13,8 +13,14 @@
                 <div class="mark">😊</div>
                 <h1>幼兒健康問卷</h1>
             </div>
-            <div id="startPanel" class="start-panel">
-                <p style="text-align:center;">載入中...</p>
+            <div id="startPanel" class="start-panel" style="text-align:center;">
+                <h2 style="margin-bottom: 20px; color: #2c7a5b;">歡迎參加測驗</h2>
+                <div style="margin-bottom: 25px;">
+                    <label for="userNameInput" style="display:block; font-size:1.2rem; margin-bottom:10px; color:#666;">請輸入您的編碼 (如座號或學號)</label>
+                    <input type="text" id="userNameInput" placeholder="請在此輸入..." 
+                           style="width: 80%; padding: 15px; font-size: 1.4rem; border-radius: 12px; border: 2px solid #d8e1e8; text-align: center; outline: none;">
+                </div>
+                <button class="primary-action" id="startButton">進入測驗</button>
             </div>
         </section>
 
@@ -24,23 +30,18 @@
                 <button class="replay-btn" id="replayButton" type="button">🔊 重聽題目</button>
             </header>
 
-            <h2 id="questionPrompt" style="text-align:center; margin: 30px 0; min-height: 1.5em;">載入題目中...</h2>
+            <h2 id="questionPrompt" style="text-align:center; margin: 30px 0;">載入中...</h2>
 
             <div class="options-grid">
                 <div class="picture-option" id="optionA">
-                    <div class="image-frame">
-                        <img id="imageA" src="" alt="選項A">
-                    </div>
+                    <div class="image-frame"><img id="imageA" src=""></div>
                     <div class="option-caption">
                         <span id="labelA" class="option-label"></span>
                         <button class="option-audio" id="audioA" type="button">▶</button>
                     </div>
                 </div>
-
                 <div class="picture-option" id="optionB">
-                    <div class="image-frame">
-                        <img id="imageB" src="" alt="選項B">
-                    </div>
+                    <div class="image-frame"><img id="imageB" src=""></div>
                     <div class="option-caption">
                         <span id="labelB" class="option-label"></span>
                         <button class="option-audio" id="audioB" type="button">▶</button>
@@ -55,11 +56,10 @@
         <section id="doneView" class="quiz-view hidden" style="text-align:center;">
             <div style="font-size: 5rem; margin-bottom: 20px;">✅</div>
             <h2>完成作答！</h2>
-            <p style="font-size:1.2rem; color:#666;">謝謝你的幫忙，資料已經成功送出。</p>
+            <p style="font-size:1.2rem; color:#666;">謝謝你的幫忙，資料已經送出。</p>
             <button class="primary-action" onclick="location.reload()" style="margin-top:30px;">返回首頁</button>
         </section>
     </main>
-
     <script src="app.js"></script>
 </body>
-</html> 
+</html>
