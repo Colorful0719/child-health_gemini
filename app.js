@@ -2,7 +2,7 @@ const FORM_ID = "1FAIpQLScXP8f1JzFq-kFYnZiLsGDUXQSQDUcE0OieeOMg4Lr6YvZzgA";
 const ENTRY_NAME = "entry.111555726";
 const ENTRY_DATA = "entry.2065308468";
 
-// 格式：[ID, 類別, 題目, 選項A文字, 選項B文字, 正確選項(a/b), 圖片A序號, 圖片B序號]
+// 已經調整正確答案 (第6欄) 的左右輪替，修正錯字
 const questions = [
   ["h1", "衛生", "吃完飯後，我會...?", "吃完直接玩玩具", "飯後刷牙", "b", 2, 1],
   ["h2", "衛生", "睡覺前，我會...?", "洗澡", "髒髒的去睡覺", "a", 3, 4],
@@ -65,14 +65,19 @@ function render() {
     document.getElementById("imageB").src = "assets/image" + q[7] + ".png";
     document.getElementById("labelA").innerText = q[3];
     document.getElementById("labelB").innerText = q[4];
-    document.getElementById("prevButton").style.display = (state.index > 0) ? "block" : "none";
-    setTimeout(() => speak(q[2] + " " + q[3] + " " + q[4]), 300);
+    
+    // 控制「上一題」按鈕顯示
+    document.getElementById("prevButton").style.display = (state.index > 0) ? "inline-block" : "none";
+    
+    // 自動唸題（去標點符號版）
+    setTimeout(() => speak(q[2].replace(/[…？?。]/g, " ") + " " + q[3] + " " + q[4]), 300);
 }
 
 function handle(choice) {
     const q = questions[state.index];
     const correctText = (q[5] === 'a') ? q[3] : q[4];
     state.answers.push(choice === correctText ? 1 : 0);
+    
     if (state.index < questions.length - 1) {
         state.index++; render();
     } else {
@@ -107,9 +112,18 @@ window.onload = () => {
         document.getElementById("quizView").classList.remove("hidden");
         render();
     };
+    
     document.getElementById("optionA").onclick = () => handle(document.getElementById("labelA").innerText);
     document.getElementById("optionB").onclick = () => handle(document.getElementById("labelB").innerText);
-    document.getElementById("prevButton").onclick = () => { if(state.index > 0){ state.index--; state.answers.pop(); render(); } };
-    document.getElementById("unknownButton").onclick = () => handle("不知道");
+    
+    document.getElementById("prevButton").onclick = () => {
+        if(state.index > 0) {
+            state.index--;
+            state.answers.pop();
+            render();
+        }
+    };
+    
     document.getElementById("replayButton").onclick = () => render();
+    document.getElementById("unknownButton").onclick = () => handle("不知道");
 };
