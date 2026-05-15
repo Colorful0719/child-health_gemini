@@ -2,7 +2,6 @@ const FORM_ID = "1FAIpQLScXP8f1JzFq-kFYnZiLsGDUXQSQDUcE0OieeOMg4Lr6YvZzgA";
 const ENTRY_NAME = "entry.111555726";
 const ENTRY_DATA = "entry.2065308468";
 
-// 已經調整正確答案 (第6欄) 的左右輪替，修正錯字
 const questions = [
   ["h1", "衛生", "吃完飯後，我會...?", "吃完直接玩玩具", "飯後刷牙", "b", 2, 1],
   ["h2", "衛生", "睡覺前，我會...?", "洗澡", "髒髒的去睡覺", "a", 3, 4],
@@ -65,11 +64,7 @@ function render() {
     document.getElementById("imageB").src = "assets/image" + q[7] + ".png";
     document.getElementById("labelA").innerText = q[3];
     document.getElementById("labelB").innerText = q[4];
-    
-    // 控制「上一題」按鈕顯示
     document.getElementById("prevButton").style.display = (state.index > 0) ? "inline-block" : "none";
-    
-    // 自動唸題（去標點符號版）
     setTimeout(() => speak(q[2].replace(/[…？?。]/g, " ") + " " + q[3] + " " + q[4]), 300);
 }
 
@@ -77,7 +72,6 @@ function handle(choice) {
     const q = questions[state.index];
     const correctText = (q[5] === 'a') ? q[3] : q[4];
     state.answers.push(choice === correctText ? 1 : 0);
-    
     if (state.index < questions.length - 1) {
         state.index++; render();
     } else {
@@ -89,7 +83,6 @@ async function submit() {
     document.getElementById("quizView").classList.add("hidden");
     document.getElementById("doneView").classList.remove("hidden");
     speak("完成囉 謝謝你的幫忙");
-    
     let scores = { h:0, e:0, n:0, v:0, s:0, total:0 };
     const details = state.answers.map((val, i) => {
         const cat = questions[i][0][0];
@@ -113,17 +106,29 @@ window.onload = () => {
         render();
     };
     
-    document.getElementById("optionA").onclick = () => handle(document.getElementById("labelA").innerText);
-    document.getElementById("optionB").onclick = () => handle(document.getElementById("labelB").innerText);
-    
-    document.getElementById("prevButton").onclick = () => {
-        if(state.index > 0) {
-            state.index--;
-            state.answers.pop();
-            render();
-        }
+    // 點擊圖片/區域才算回答
+    document.getElementById("optionA").onclick = (e) => {
+        if(e.target.id === "btnAudioA") return; // 如果點到音效鈕，不執行回答
+        handle(document.getElementById("labelA").innerText);
+    };
+    document.getElementById("optionB").onclick = (e) => {
+        if(e.target.id === "btnAudioB") return; // 如果點到音效鈕，不執行回答
+        handle(document.getElementById("labelB").innerText);
     };
     
+    // 單獨重聽選項文字
+    document.getElementById("btnAudioA").onclick = (e) => {
+        e.stopPropagation(); // 防止觸發 optionA 的回答事件
+        speak(document.getElementById("labelA").innerText);
+    };
+    document.getElementById("btnAudioB").onclick = (e) => {
+        e.stopPropagation(); // 防止觸發 optionB 的回答事件
+        speak(document.getElementById("labelB").innerText);
+    };
+    
+    document.getElementById("prevButton").onclick = () => {
+        if(state.index > 0) { state.index--; state.answers.pop(); render(); }
+    };
     document.getElementById("replayButton").onclick = () => render();
     document.getElementById("unknownButton").onclick = () => handle("不知道");
 };
