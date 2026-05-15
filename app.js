@@ -2,7 +2,6 @@ const FORM_ID = "1FAIpQLScXP8f1JzFq-kFYnZiLsGDUXQSQDUcE0OieeOMg4Lr6YvZzgA";
 const ENTRY_NAME = "entry.111555726";
 const ENTRY_DATA = "entry.2065308468";
 
-// 題目資料庫
 const questions = [
   ["h1", "衛生", "吃完飯後，我會...?", "吃完直接玩玩具", "飯後刷牙", "b", 2, 1],
   ["h2", "衛生", "睡覺前，我會...?", "洗澡", "髒髒的去睡覺", "a", 3, 4],
@@ -50,12 +49,33 @@ const questions = [
 
 let state = { index: 0, answers: [], user: "" };
 
-function speak(t) {
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(t);
-    u.lang = "zh-TW"; 
-    u.rate = 0.8; // 調慢語速，讓發音更清楚
+// 基礎語音功能
+function speakText(text, callback) {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "zh-TW";
+    u.rate = 0.8;
+    if (callback) u.onend = callback;
     window.speechSynthesis.speak(u);
+}
+
+// 核心導引語音：分段唸出題目與選項
+function playGuidance() {
+    window.speechSynthesis.cancel();
+    const q = questions[state.index];
+    const questionText = q[2].replace(/[…？?。]/g, "");
+    
+    // 第一步：唸題目
+    speakText(questionText, () => {
+        // 題目唸完後，停 1.2 秒再唸選項 A
+        setTimeout(() => {
+            speakText(q[3], () => {
+                // 選項 A 唸完後，停 1 秒再唸選項 B
+                setTimeout(() => {
+                    speakText(q[4]);
+                }, 1000);
+            });
+        }, 1200);
+    });
 }
 
 function render() {
@@ -69,15 +89,12 @@ function render() {
     
     document.getElementById("prevButton").style.display = (state.index > 0) ? "inline-block" : "none";
     
-    // 【語音優化】
-    // 使用逗號產生短停頓，使用大量空格產生明顯長停頓
-    const pause = ",      "; 
-    const combinedText = q[2].replace(/[…？?。]/g, "") + pause + q[3] + pause + q[4];
-    
-    setTimeout(() => speak(combinedText), 300);
+    // 進入新題目，延遲 0.5 秒開始啟動導引語音
+    setTimeout(playGuidance, 500);
 }
 
 function handle(choice) {
+    window.speechSynthesis.cancel(); // 點選瞬間立刻停止說話
     const q = questions[state.index];
     const correctText = (q[5] === 'a') ? q[3] : q[4];
     state.answers.push(choice === correctText ? 1 : 0);
@@ -91,7 +108,7 @@ function handle(choice) {
 async function submit() {
     document.getElementById("quizView").classList.add("hidden");
     document.getElementById("doneView").classList.remove("hidden");
-    speak("完成囉，謝謝你的幫忙");
+    speakText("完成囉，謝謝你的幫忙");
     
     let scores = { h:0, e:0, n:0, v:0, s:0, total:0 };
     const details = state.answers.map((val, i) => {
@@ -127,16 +144,18 @@ window.onload = () => {
     
     document.getElementById("btnAudioA").onclick = (e) => {
         e.stopPropagation();
-        speak(document.getElementById("labelA").innerText);
+        window.speechSynthesis.cancel();
+        speakText(document.getElementById("labelA").innerText);
     };
     document.getElementById("btnAudioB").onclick = (e) => {
         e.stopPropagation();
-        speak(document.getElementById("labelB").innerText);
+        window.speechSynthesis.cancel();
+        speakText(document.getElementById("labelB").innerText);
     };
     
     document.getElementById("prevButton").onclick = () => {
         if(state.index > 0) { state.index--; state.answers.pop(); render(); }
     };
-    document.getElementById("replayButton").onclick = () => render();
+    document.getElementById("replayButton").onclick = () => playGuidance();
     document.getElementById("unknownButton").onclick = () => handle("不知道");
 };
