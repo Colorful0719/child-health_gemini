@@ -2,6 +2,7 @@ const FORM_ID = "1FAIpQLScXP8f1JzFq-kFYnZiLsGDUXQSQDUcE0OieeOMg4Lr6YvZzgA";
 const ENTRY_NAME = "entry.111555726";
 const ENTRY_DATA = "entry.2065308468";
 
+// 題目資料庫
 const questions = [
   ["h1", "衛生", "吃完飯後，我會...?", "吃完直接玩玩具", "飯後刷牙", "b", 2, 1],
   ["h2", "衛生", "睡覺前，我會...?", "洗澡", "髒髒的去睡覺", "a", 3, 4],
@@ -52,7 +53,8 @@ let state = { index: 0, answers: [], user: "" };
 function speak(t) {
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(t);
-    u.lang = "zh-TW"; u.rate = 0.85;
+    u.lang = "zh-TW"; 
+    u.rate = 0.8; // 調慢語速，讓發音更清楚
     window.speechSynthesis.speak(u);
 }
 
@@ -64,8 +66,15 @@ function render() {
     document.getElementById("imageB").src = "assets/image" + q[7] + ".png";
     document.getElementById("labelA").innerText = q[3];
     document.getElementById("labelB").innerText = q[4];
+    
     document.getElementById("prevButton").style.display = (state.index > 0) ? "inline-block" : "none";
-    setTimeout(() => speak(q[2].replace(/[…？?。]/g, " ") + " " + q[3] + " " + q[4]), 300);
+    
+    // 【語音優化】
+    // 使用逗號產生短停頓，使用大量空格產生明顯長停頓
+    const pause = ",      "; 
+    const combinedText = q[2].replace(/[…？?。]/g, "") + pause + q[3] + pause + q[4];
+    
+    setTimeout(() => speak(combinedText), 300);
 }
 
 function handle(choice) {
@@ -82,7 +91,8 @@ function handle(choice) {
 async function submit() {
     document.getElementById("quizView").classList.add("hidden");
     document.getElementById("doneView").classList.remove("hidden");
-    speak("完成囉 謝謝你的幫忙");
+    speak("完成囉，謝謝你的幫忙");
+    
     let scores = { h:0, e:0, n:0, v:0, s:0, total:0 };
     const details = state.answers.map((val, i) => {
         const cat = questions[i][0][0];
@@ -106,23 +116,21 @@ window.onload = () => {
         render();
     };
     
-    // 點擊圖片/區域才算回答
     document.getElementById("optionA").onclick = (e) => {
-        if(e.target.id === "btnAudioA") return; // 如果點到音效鈕，不執行回答
+        if(e.target.id === "btnAudioA") return;
         handle(document.getElementById("labelA").innerText);
     };
     document.getElementById("optionB").onclick = (e) => {
-        if(e.target.id === "btnAudioB") return; // 如果點到音效鈕，不執行回答
+        if(e.target.id === "btnAudioB") return;
         handle(document.getElementById("labelB").innerText);
     };
     
-    // 單獨重聽選項文字
     document.getElementById("btnAudioA").onclick = (e) => {
-        e.stopPropagation(); // 防止觸發 optionA 的回答事件
+        e.stopPropagation();
         speak(document.getElementById("labelA").innerText);
     };
     document.getElementById("btnAudioB").onclick = (e) => {
-        e.stopPropagation(); // 防止觸發 optionB 的回答事件
+        e.stopPropagation();
         speak(document.getElementById("labelB").innerText);
     };
     
