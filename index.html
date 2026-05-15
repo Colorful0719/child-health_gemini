@@ -3,62 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>幼兒健康識能測驗</title>
+    <title>幼兒健康問卷</title>
     <style>
-        :root { --green: #2c7a5b; --bg: #e9f5f0; --coral: #f8d7cf; --line: #d8e1e8; }
-        body { margin: 0; background: var(--bg); font-family: "Microsoft JhengHei", sans-serif; display: flex; justify-content: center; }
-        .app-shell { width: min(1000px, 95%); padding: 20px 0; }
+        :root { --green: #2c7a5b; --bg: #e9f5f0; --line: #d8e1e8; }
+        body { margin: 0; background: var(--bg); font-family: sans-serif; display: flex; justify-content: center; }
         .hidden { display: none !important; }
-        .quiz-view { background: white; border-radius: 25px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); margin-top: 10px; }
-        .brand-row { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
-        .mark { width: 60px; height: 60px; background: var(--green); border-radius: 50%; display: grid; place-items: center; font-size: 35px; color: white; }
-        .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .counter { font-size: 1.5rem; font-weight: bold; color: #888; }
-        .header-controls { display: flex; gap: 10px; }
-        .replay-btn { padding: 10px 20px; border-radius: 30px; border: 1px solid var(--line); cursor: pointer; background: white; font-size: 1rem; }
-        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .picture-option { border: 3px solid var(--line); border-radius: 20px; padding: 15px; cursor: pointer; text-align: center; }
-        .image-frame { width: 100%; height: 35vh; display: flex; justify-content: center; align-items: center; background: #f9f9f9; border-radius: 12px; overflow: hidden; }
-        .image-frame img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        .option-caption { display: flex; align-items: center; justify-content: space-between; margin-top: 15px; }
-        .option-label { font-size: 1.5rem; font-weight: bold; }
-        .option-audio { width: 50px; height: 50px; border-radius: 50%; border: 0; background: var(--green); color: white; cursor: pointer; display: grid; place-items: center; }
-        .unknown-button { position: fixed; right: 25px; bottom: 25px; background: var(--coral); border: 2px solid var(--line); padding: 15px 40px; border-radius: 50px; font-size: 1.3rem; font-weight: bold; cursor: pointer; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .primary-action { background: var(--green); color: white; border: 0; padding: 18px; border-radius: 15px; font-size: 1.6rem; font-weight: bold; cursor: pointer; width: 100%; }
-        @media (max-width: 600px) { .options-grid { grid-template-columns: 1fr; } .image-frame { height: 25vh; } }
+        .quiz-view { background: white; border-radius: 20px; padding: 30px; margin-top: 20px; width: 90%; max-width: 600px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; }
+        input { width: 80%; padding: 15px; font-size: 1.2rem; margin: 20px 0; border: 2px solid var(--line); border-radius: 10px; }
+        button.primary { background: var(--green); color: white; border: 0; padding: 15px 30px; font-size: 1.2rem; border-radius: 10px; cursor: pointer; width: 100%; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .picture-option { border: 2px solid var(--line); padding: 10px; border-radius: 10px; cursor: pointer; }
+        .image-frame img { width: 100%; height: auto; border-radius: 5px; }
     </style>
 </head>
 <body>
-    <main class="app-shell">
+    <main style="width: 100%; display: flex; justify-content: center;">
         <section id="welcomeView" class="quiz-view">
-            <div class="brand-row"><div class="mark">😊</div><h1>幼兒健康問卷</h1></div>
-            <div style="text-align:center; padding: 20px;">
-                <h2 style="color: #2c7a5b;">歡迎參加測驗</h2>
-                <div style="margin: 30px 0;">
-                    <label for="userNameInput" style="display:block; font-size:1.2rem; margin-bottom:10px; color:#666;">請輸入您的編碼 (如座號或學號)</label>
-                    <input type="text" id="userNameInput" placeholder="在此輸入..." style="width: 80%; padding: 15px; font-size: 1.4rem; border-radius: 12px; border: 2px solid #d8e1e8; text-align: center;">
-                </div>
-                <button class="primary-action" id="startButton">進入測驗</button>
-            </div>
+            <h1>😊 幼兒健康問卷</h1>
+            <p>請輸入您的編碼</p>
+            <input type="text" id="userNameInput" placeholder="例如座號或學號">
+            <button class="primary" id="startButton">進入測驗</button>
         </section>
 
         <section id="quizView" class="quiz-view hidden">
-            <header class="quiz-header">
-                <div class="counter"><span id="currentNum">1</span> / 42</div>
-                <div class="header-controls">
-                    <button class="replay-btn" id="prevButton" type="button" style="display: none;">⬅ 上一題</button>
-                    <button class="replay-btn" id="replayButton" type="button">🔊 重聽題目</button>
-                </div>
-            </header>
-            <h2 id="questionPrompt" style="text-align:center; margin: 30px 0; min-height: 1.2em;">載入中...</h2>
+            <div style="display:flex; justify-content: space-between; margin-bottom: 10px;">
+                <span id="currentNum">1</span> / 42
+                <button id="prevButton" style="display:none;">⬅ 上一題</button>
+            </div>
+            <h2 id="questionPrompt">載入中...</h2>
             <div class="options-grid">
                 <div class="picture-option" id="optionA">
-                    <div class="image-frame"><img id="imageA" src="" alt=""></div>
-                    <div class="option-caption"><span id="labelA" class="option-label"></span><button class="option-audio" id="audioA" type="button">▶</button></div>
+                    <div class="image-frame"><img id="imageA" src=""></div>
+                    <p id="labelA"></p>
                 </div>
                 <div class="picture-option" id="optionB">
-                    <div class="image-frame"><img id="imageB" src="" alt=""></div>
-                    <div class="option-caption"><span id="labelB" class="option-label"></span><button class="option-audio" id="audioB" type="button">▶</button></div>
+                    <div class="image-frame"><img id="imageB" src=""></div>
+                    <p id="labelB"></p>
                 </div>
             </div>
-            <button class="unknown-
+            <button id="unknownButton" style="margin-top:20px; background:#f8d7cf; border:0; padding:10px 20px; border-radius:20px;">不知道</button>
+        </section>
+
+        <section id="doneView" class="quiz-view hidden">
+            <h2>✅ 完成！</h2>
+            <button class="primary" onclick="location.reload()">返回首頁</button>
+        </section>
+    </main>
+    <script src="app.js"></script>
+</body>
+</html>
