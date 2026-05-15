@@ -3,7 +3,6 @@ const ENTRY_NAME = "entry.111555726";
 const ENTRY_DATA = "entry.2065308468";
 
 // 格式：[ID, 類別, 題目, 選項A文字, 選項B文字, 正確選項(a/b), 圖片A序號, 圖片B序號]
-// 已經調整正確答案 (第6欄) 的左右配置，讓測驗更具信度
 const questions = [
   ["h1", "衛生", "吃完飯後，我會...?", "吃完直接玩玩具", "飯後刷牙", "b", 2, 1],
   ["h2", "衛生", "睡覺前，我會...?", "洗澡", "髒髒的去睡覺", "a", 3, 4],
@@ -112,4 +111,5 @@ window.onload = () => {
     document.getElementById("optionB").onclick = () => handle(document.getElementById("labelB").innerText);
     document.getElementById("prevButton").onclick = () => { if(state.index > 0){ state.index--; state.answers.pop(); render(); } };
     document.getElementById("unknownButton").onclick = () => handle("不知道");
+    document.getElementById("replayButton").onclick = () => render();
 };
