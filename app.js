@@ -61,4 +61,76 @@ function renderQuestion() {
   document.getElementById("currentNum").textContent = state.index + 1;
   document.getElementById("questionPrompt").textContent = q[2];
   document.getElementById("imageA").src = "assets/image" + q[6] + ".png";
-  document.getElementById("imageB
+  document.getElementById("imageB").src = "assets/image" + q[7] + ".png";
+  document.getElementById("labelA").textContent = q[3];
+  document.getElementById("labelB").textContent = q[4];
+  
+  // 第一題隱藏上一題按鈕
+  const prevBtn = document.getElementById("prevButton");
+  if (prevBtn) { prevBtn.style.display = (state.index === 0) ? "none" : "inline-block"; }
+
+  // 修正：使用空格替代句號，避免唸出「句號」
+  setTimeout(() => { speak(q[2] + " " + q[3] + " " + q[4]); }, 300);
+}
+
+function handleAnswer(selectedLabel) {
+  const q = questions[state.index];
+  const correctLabel = (q[5] === 'a') ? q[3] : q[4];
+  let score = (selectedLabel === correctLabel) ? 1 : 0;
+  state.answers.push({ score: score });
+  if (state.index < questions.length - 1) { state.index++; renderQuestion(); } else { submitResults(); }
+}
+
+function handlePrevious() {
+  if (state.index > 0) {
+    state.index--;
+    state.answers.pop(); // 移除最後一筆存入的答案
+    renderQuestion();
+  }
+}
+
+async function submitResults() {
+  document.getElementById("quizView").classList.add("hidden");
+  document.getElementById("doneView").classList.remove("hidden");
+  speak("完成囉 謝謝你的幫忙");
+
+  let catScore = { h: 0, e: 0, n: 0, v: 0, s: 0 };
+  let totalScore = 0;
+  const detailScores = state.answers.map((item, i) => {
+    const s = item.score;
+    const cat = questions[i][0].charAt(0);
+    if (s === 1) { totalScore++; if (catScore[cat] !== undefined) catScore[cat]++; }
+    return s;
+  });
+
+  const summary = [...detailScores, catScore.h, catScore.e, catScore.n, catScore.v, catScore.s, totalScore].join(",");
+  const formData = new FormData();
+  formData.append(ENTRY_ID_NAME, state.displayName);
+  formData.append(ENTRY_ID_DATA, summary);
+
+  try {
+    await fetch(`https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`, { method: "POST", mode: "no-cors", body: formData });
+  } catch (e) { console.error(e); }
+}
+
+window.onload = () => {
+  const startBtn = document.getElementById("startButton");
+  const nameInput = document.getElementById("userNameInput");
+
+  startBtn.onclick = () => {
+    const val = nameInput.value.trim();
+    if (!val) { alert("請先輸入編碼再開始喔"); return; }
+    state.displayName = val;
+    document.getElementById("welcomeView").classList.add("hidden");
+    document.getElementById("quizView").classList.remove("hidden");
+    renderQuestion();
+  };
+
+  document.getElementById("optionA").onclick = (e) => { if (!e.target.closest('.option-audio')) handleAnswer(document.getElementById("labelA").textContent); };
+  document.getElementById("optionB").onclick = (e) => { if (!e.target.closest('.option-audio')) handleAnswer(document.getElementById("labelB").textContent); };
+  document.getElementById("audioA").onclick = (e) => { e.stopPropagation(); speak(document.getElementById("labelA").textContent); };
+  document.getElementById("audioB").onclick = (e) => { e.stopPropagation(); speak(document.getElementById("labelB").textContent); };
+  document.getElementById("replayButton").onclick = () => renderQuestion();
+  document.getElementById("prevButton").onclick = () => handlePrevious();
+  document.getElementById("unknownButton").onclick = () => handleAnswer("不知道");
+};
