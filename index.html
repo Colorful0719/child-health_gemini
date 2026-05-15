@@ -3,55 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>幼兒健康識能測驗</title>
+    <title>幼兒健康問卷</title>
     <style>
         :root { --green: #2c7a5b; --bg: #e9f5f0; --line: #d8e1e8; --coral: #f8d7cf; }
         body { margin: 0; background: var(--bg); font-family: "Microsoft JhengHei", sans-serif; display: flex; justify-content: center; }
         .hidden { display: none !important; }
         .quiz-view { background: white; border-radius: 20px; padding: 30px; margin-top: 20px; width: 90%; max-width: 800px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; position: relative; min-height: 80vh; }
-        
-        /* 輸入框與標題 */
         input { width: 80%; padding: 15px; font-size: 1.4rem; margin: 20px 0; border: 2px solid var(--line); border-radius: 12px; text-align: center; }
         button.primary { background: var(--green); color: white; border: 0; padding: 18px; font-size: 1.5rem; border-radius: 12px; cursor: pointer; width: 100%; font-weight: bold; }
-        
-        /* 標題列控制項 */
         .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .header-btns { display: flex; gap: 10px; }
         .control-btn { background: white; border: 1px solid var(--line); padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 1rem; color: #444; }
-
-        /* 選項圖片與文字 */
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .picture-option { border: 3px solid var(--line); border-radius: 15px; padding: 10px; cursor: pointer; transition: transform 0.2s; }
+        .picture-option { border: 3px solid var(--line); border-radius: 15px; padding: 10px; cursor: pointer; transition: transform 0.2s; position: relative; }
         .image-frame img { width: 100%; height: auto; max-height: 35vh; object-fit: contain; border-radius: 10px; }
-        .option-label { font-size: 1.4rem; font-weight: bold; margin-top: 10px; }
+        
+        /* 選項標籤與重聽按鈕佈局 */
+        .option-footer { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
+        .option-label { font-size: 1.4rem; font-weight: bold; margin: 0; }
+        .btn-audio-small { background: var(--green); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
 
-        /* 🔴 不知道按鈕：嚴格固定在螢幕右下角 */
-        .unknown-btn { 
-            position: fixed; 
-            right: 30px; 
-            bottom: 30px; 
-            background: var(--coral); 
-            border: 2px solid #edb7ad; 
-            padding: 15px 40px; 
-            border-radius: 50px; 
-            font-weight: bold; 
-            font-size: 1.3rem;
-            cursor: pointer; 
-            z-index: 1000; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-
-        @media (max-width: 600px) { 
-            .options-grid { grid-template-columns: 1fr; } 
-            .unknown-btn { padding: 12px 30px; font-size: 1.1rem; right: 15px; bottom: 15px; }
-        }
+        .unknown-btn { position: fixed; right: 30px; bottom: 30px; background: var(--coral); border: 2px solid #edb7ad; padding: 15px 40px; border-radius: 50px; font-weight: bold; font-size: 1.3rem; cursor: pointer; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .options-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
     <section id="welcomeView" class="quiz-view">
         <h1 style="font-size: 2.5rem;">😊</h1>
         <h1 style="color: var(--green);">幼兒健康問卷</h1>
-        <p style="color: #666; font-size: 1.2rem;">請施測者輸入受試者編碼</p>
         <input type="text" id="userNameInput" placeholder="在此輸入座號或學號">
         <button class="primary" id="startButton">開始測驗</button>
     </section>
@@ -67,12 +46,18 @@
         <h2 id="questionPrompt" style="margin: 20px 0; font-size: 1.8rem; color: #333;">載入中...</h2>
         <div class="options-grid">
             <div class="picture-option" id="optionA">
-                <div class="image-frame"><img id="imageA" src="" alt="選項A"></div>
-                <p id="labelA" class="option-label"></p>
+                <div class="image-frame"><img id="imageA" src=""></div>
+                <div class="option-footer">
+                    <p id="labelA" class="option-label"></p>
+                    <button class="btn-audio-small" id="btnAudioA" type="button">▶</button>
+                </div>
             </div>
             <div class="picture-option" id="optionB">
-                <div class="image-frame"><img id="imageB" src="" alt="選項B"></div>
-                <p id="labelB" class="option-label"></p>
+                <div class="image-frame"><img id="imageB" src=""></div>
+                <div class="option-footer">
+                    <p id="labelB" class="option-label"></p>
+                    <button class="btn-audio-small" id="btnAudioB" type="button">▶</button>
+                </div>
             </div>
         </div>
         <button id="unknownButton" class="unknown-btn">不知道</button>
@@ -81,10 +66,8 @@
     <section id="doneView" class="quiz-view hidden" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
         <h2 style="font-size: 5rem;">✅</h2>
         <h2 style="color: var(--green);">完成作答！</h2>
-        <p style="color: #666;">謝謝你的參與，資料已成功送出。</p>
         <button class="primary" onclick="location.reload()" style="max-width: 300px; margin-top: 30px;">返回首頁</button>
     </section>
-
     <script src="app.js"></script>
 </body>
 </html>
