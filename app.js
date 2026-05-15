@@ -49,32 +49,28 @@ const questions = [
 
 let state = { index: 0, answers: [], user: "" };
 
-// 基礎語音功能
 function speakText(text, callback) {
     const u = new SpeechSynthesisUtterance(text);
     u.lang = "zh-TW";
-    u.rate = 0.8;
+    u.rate = 0.85; // 稍微恢復一點點語速，配合短間隔
     if (callback) u.onend = callback;
     window.speechSynthesis.speak(u);
 }
 
-// 核心導引語音：分段唸出題目與選項
 function playGuidance() {
     window.speechSynthesis.cancel();
     const q = questions[state.index];
     const questionText = q[2].replace(/[…？?。]/g, "");
     
-    // 第一步：唸題目
+    // 統一間隔為 0.8 秒 (800 毫秒)
     speakText(questionText, () => {
-        // 題目唸完後，停 1.2 秒再唸選項 A
         setTimeout(() => {
             speakText(q[3], () => {
-                // 選項 A 唸完後，停 1 秒再唸選項 B
                 setTimeout(() => {
                     speakText(q[4]);
-                }, 1000);
+                }, 800);
             });
-        }, 1200);
+        }, 800);
     });
 }
 
@@ -86,15 +82,12 @@ function render() {
     document.getElementById("imageB").src = "assets/image" + q[7] + ".png";
     document.getElementById("labelA").innerText = q[3];
     document.getElementById("labelB").innerText = q[4];
-    
     document.getElementById("prevButton").style.display = (state.index > 0) ? "inline-block" : "none";
-    
-    // 進入新題目，延遲 0.5 秒開始啟動導引語音
     setTimeout(playGuidance, 500);
 }
 
 function handle(choice) {
-    window.speechSynthesis.cancel(); // 點選瞬間立刻停止說話
+    window.speechSynthesis.cancel();
     const q = questions[state.index];
     const correctText = (q[5] === 'a') ? q[3] : q[4];
     state.answers.push(choice === correctText ? 1 : 0);
