@@ -12,7 +12,7 @@
         .quiz-view { background: white; border-radius: 25px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); margin-top: 10px; }
         .brand-row { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
         .mark { width: 60px; height: 60px; background: var(--green); border-radius: 50%; display: grid; place-items: center; font-size: 35px; color: white; }
-        .quiz-header { display: flex; justify-content: space-between; align-items: center; }
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .counter { font-size: 1.5rem; font-weight: bold; color: #888; }
         .header-controls { display: flex; gap: 10px; }
         .replay-btn { padding: 10px 20px; border-radius: 30px; border: 1px solid var(--line); cursor: pointer; background: white; font-size: 1rem; }
@@ -22,7 +22,7 @@
         .image-frame img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .option-caption { display: flex; align-items: center; justify-content: space-between; margin-top: 15px; }
         .option-label { font-size: 1.5rem; font-weight: bold; }
-        .option-audio { width: 50px; height: 50px; border-radius: 50%; border: 0; background: var(--green); color: white; cursor: pointer; }
+        .option-audio { width: 50px; height: 50px; border-radius: 50%; border: 0; background: var(--green); color: white; cursor: pointer; display: grid; place-items: center; }
         .unknown-button { position: fixed; right: 25px; bottom: 25px; background: var(--coral); border: 2px solid var(--line); padding: 15px 40px; border-radius: 50px; font-size: 1.3rem; font-weight: bold; cursor: pointer; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         .primary-action { background: var(--green); color: white; border: 0; padding: 18px; border-radius: 15px; font-size: 1.6rem; font-weight: bold; cursor: pointer; width: 100%; }
         @media (max-width: 600px) { .options-grid { grid-template-columns: 1fr; } .image-frame { height: 25vh; } }
@@ -35,7 +35,7 @@
             <div style="text-align:center; padding: 20px;">
                 <h2 style="color: #2c7a5b;">歡迎參加測驗</h2>
                 <div style="margin: 30px 0;">
-                    <label style="display:block; font-size:1.2rem; margin-bottom:10px; color:#666;">請輸入您的編碼 (如座號或學號)</label>
+                    <label for="userNameInput" style="display:block; font-size:1.2rem; margin-bottom:10px; color:#666;">請輸入您的編碼 (如座號或學號)</label>
                     <input type="text" id="userNameInput" placeholder="在此輸入..." style="width: 80%; padding: 15px; font-size: 1.4rem; border-radius: 12px; border: 2px solid #d8e1e8; text-align: center;">
                 </div>
                 <button class="primary-action" id="startButton">進入測驗</button>
@@ -61,16 +61,4 @@
                     <div class="option-caption"><span id="labelB" class="option-label"></span><button class="option-audio" id="audioB" type="button">▶</button></div>
                 </div>
             </div>
-            <button class="unknown-button" id="unknownButton" type="button">不知道</button>
-        </section>
-
-        <section id="doneView" class="quiz-view hidden" style="text-align:center;">
-            <div style="font-size: 5rem; margin-bottom: 20px;">✅</div>
-            <h2>完成作答！</h2>
-            <p>資料已成功送出，謝謝你的參與。</p>
-            <button class="primary-action" onclick="location.reload()" style="margin-top:30px;">返回首頁</button>
-        </section>
-    </main>
-    <script src="app.js"></script>
-</body>
-</html>
+            <button class="unknown-
