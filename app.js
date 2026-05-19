@@ -61,8 +61,6 @@ function playGuidance() {
     window.speechSynthesis.cancel();
     const q = questions[state.index];
     const questionText = q[2].replace(/[…？?。]/g, "");
-    
-    // 統一間隔為 0.6 秒 (600 毫秒)
     speakText(questionText, () => {
         setTimeout(() => {
             speakText(q[3], () => {
@@ -89,8 +87,17 @@ function render() {
 function handle(choice) {
     window.speechSynthesis.cancel();
     const q = questions[state.index];
-    const correctText = (q[5] === 'a') ? q[3] : q[4];
-    state.answers.push(choice === correctText ? 1 : 0);
+    
+    let recordValue;
+    if (choice === "不知道") {
+        recordValue = 3; // 指令：不知道記錄為 3
+    } else {
+        const correctText = (q[5] === 'a') ? q[3] : q[4];
+        recordValue = (choice === correctText) ? 1 : 0;
+    }
+    
+    state.answers.push(recordValue);
+    
     if (state.index < questions.length - 1) {
         state.index++; render();
     } else {
@@ -106,7 +113,11 @@ async function submit() {
     let scores = { h:0, e:0, n:0, v:0, s:0, total:0 };
     const details = state.answers.map((val, i) => {
         const cat = questions[i][0][0];
-        if (val === 1) { scores.total++; scores[cat]++; }
+        // 計分邏輯：只有 1 (答對) 才算分，0 或 3 皆不計分
+        if (val === 1) { 
+            scores.total++; 
+            scores[cat]++; 
+        }
         return val;
     });
     const summary = [...details, scores.h, scores.e, scores.n, scores.v, scores.s, scores.total].join(",");
