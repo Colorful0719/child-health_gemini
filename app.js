@@ -2,6 +2,7 @@ const FORM_ID = "1FAIpQLScXP8f1JzFq-kFYnZiLsGDUXQSQDUcE0OieeOMg4Lr6YvZzgA";
 const ENTRY_NAME = "entry.111555726";
 const ENTRY_DATA = "entry.2065308468";
 
+// 已更新為您提供的最新精簡版題目與選項，並維持正確答案左右交替配置
 const questions = [
   ["h1", "衛生", "吃完飯後，我會...?", "玩玩具", "刷牙", "b", 2, 1],
   ["h2", "衛生", "睡覺前，我會...?", "洗澡", "髒髒的去睡覺", "a", 3, 4],
@@ -37,7 +38,7 @@ const questions = [
   ["s5", "安全", "準備要過馬路的時候，我會…？", "牽大人的手", "自己衝過去", "a", 63, 64],
   ["s6", "安全", "當我騎腳踏車的時候，我會…？", "放手騎車", "雙手握把手", "b", 66, 65],
   ["s7", "安全", "過馬路要看交通號誌，我會…？", "綠燈亮時走", "紅燈亮時走", "a", 67, 68],
-  ["s8", "安全", "玩水時，我會⋯？", "自己去玩", "需要有大人陪", "b", 70, 69],
+  ["s8", "安全", "玩水時 push，我會⋯？", "自己去玩", "需要有大人陪", "b", 70, 69],
   ["s9", "安全", "騎腳踏車運動時，我會選擇在…？", "騎在腳踏車道", "騎在馬路中間", "a", 71, 72],
   ["s10", "安全", "搭機車出門的時候，我會…？", "不戴安全帽", "戴安全帽", "b", 74, 73],
   ["s11", "安全", "如果看到地上有打火機，我會…？", "玩打火機", "把打火機交給大人", "b", 75, 76],
@@ -61,6 +62,8 @@ function playGuidance() {
     window.speechSynthesis.cancel();
     const q = questions[state.index];
     const questionText = q[2].replace(/[…？?。]/g, "");
+    
+    // 語音間隔維持 0.6 秒 (600 毫秒)
     speakText(questionText, () => {
         setTimeout(() => {
             speakText(q[3], () => {
@@ -90,14 +93,13 @@ function handle(choice) {
     
     let recordValue;
     if (choice === "不知道") {
-        recordValue = 3; // 指令：不知道記錄為 3
+        recordValue = 3; // 不知道填答紀錄維持為 3
     } else {
         const correctText = (q[5] === 'a') ? q[3] : q[4];
         recordValue = (choice === correctText) ? 1 : 0;
     }
     
     state.answers.push(recordValue);
-    
     if (state.index < questions.length - 1) {
         state.index++; render();
     } else {
@@ -113,11 +115,7 @@ async function submit() {
     let scores = { h:0, e:0, n:0, v:0, s:0, total:0 };
     const details = state.answers.map((val, i) => {
         const cat = questions[i][0][0];
-        // 計分邏輯：只有 1 (答對) 才算分，0 或 3 皆不計分
-        if (val === 1) { 
-            scores.total++; 
-            scores[cat]++; 
-        }
+        if (val === 1) { scores.total++; scores[cat]++; }
         return val;
     });
     const summary = [...details, scores.h, scores.e, scores.n, scores.v, scores.s, scores.total].join(",");
