@@ -3,7 +3,6 @@ const ENTRY_NAME = "entry.111555726";
 const ENTRY_DATA = "entry.2065308468";
 
 // 已更新為您提供的最新精簡版題目與選項，並維持正確答案左右交替配置
-// 2026-05-25: 修正 e3 與 e5 選項與圖片順序
 const questions = [
   ["h1", "衛生", "吃完飯後，我會...?", "玩玩具", "刷牙", "b", 2, 1],
   ["h2", "衛生", "睡覺前，我會...?", "洗澡", "髒髒的去睡覺", "a", 3, 4],
@@ -13,9 +12,9 @@ const questions = [
   ["h6", "衛生", "我會讓我的指甲保持…?", "乾淨短指甲", "髒髒長指甲", "a", 11, 12],
   ["e1", "運動", "我想讓身體更健康，我會⋯？", "看電視", "玩跳繩", "b", 14, 13],
   ["e2", "運動", "我想讓身體更有力氣，我會⋯？", "拍球", "看書", "a", 15, 16],
-  ["e3", "運動", "我想讓身體更健康，我會⋯？", "玩電腦", "游泳", "b", 17, 18],
+  ["e3", "運動", "我想讓身體更健康，我會⋯？", "游泳", "玩電腦", "a", 18, 17],
   ["e4", "運動", "我想讓身體更強壯，我會⋯？", "跑步", "滑平板", "a", 19, 20],
-  ["e5", "運動", "我想讓身體更有力量，我會⋯？", "玩電動", "玩攀爬架", "b", 21, 22],
+  ["e5", "運動", "我想讓身體更有力量，我會⋯？", "玩攀爬架", "玩電動", "a", 22, 21],
   ["e6", "運動", "我想讓身體更有力氣，我會⋯？", "騎腳踏車", "玩樂高", "a", 23, 24],
   ["n1", "營養", "哪種食物對身體好呢？", "糖果", "小番茄或切片芭樂", "b", 26, 25],
   ["n2", "營養", "哪種食物對身體好呢？", "吃飯", "洋芋片", "a", 27, 28],
@@ -81,84 +80,4 @@ function render() {
     document.getElementById("currentNum").innerText = state.index + 1;
     document.getElementById("questionPrompt").innerText = q[2];
     document.getElementById("imageA").src = "assets/image" + q[6] + ".png";
-    document.getElementById("imageB").src = "assets/image" + q[7] + ".png";
-    document.getElementById("labelA").innerText = q[3];
-    document.getElementById("labelB").innerText = q[4];
-    document.getElementById("prevButton").style.display = (state.index > 0) ? "inline-block" : "none";
-    setTimeout(playGuidance, 500);
-}
-
-function handle(choice) {
-    window.speechSynthesis.cancel();
-    const q = questions[state.index];
-    
-    let recordValue;
-    if (choice === "不知道") {
-        recordValue = 3; // 不知道填答紀錄維持為 3
-    } else {
-        const correctText = (q[5] === 'a') ? q[3] : q[4];
-        recordValue = (choice === correctText) ? 1 : 0;
-    }
-    
-    state.answers.push(recordValue);
-    if (state.index < questions.length - 1) {
-        state.index++; render();
-    } else {
-        submit();
-    }
-}
-
-async function submit() {
-    document.getElementById("quizView").classList.add("hidden");
-    document.getElementById("doneView").classList.remove("hidden");
-    speakText("完成囉，謝謝你的幫忙");
-    
-    let scores = { h:0, e:0, n:0, v:0, s:0, total:0 };
-    const details = state.answers.map((val, i) => {
-        const cat = questions[i][0][0];
-        if (val === 1) { scores.total++; scores[cat]++; }
-        return val;
-    });
-    const summary = [...details, scores.h, scores.e, scores.n, scores.v, scores.s, scores.total].join(",");
-    const fd = new FormData();
-    fd.append(ENTRY_NAME, state.user);
-    fd.append(ENTRY_DATA, summary);
-    await fetch(`https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`, { method:"POST", mode:"no-cors", body:fd });
-}
-
-window.onload = () => {
-    document.getElementById("startButton").onclick = () => {
-        const val = document.getElementById("userNameInput").value.trim();
-        if (!val) return alert("請輸入編碼");
-        state.user = val;
-        document.getElementById("welcomeView").classList.add("hidden");
-        document.getElementById("quizView").classList.remove("hidden");
-        render();
-    };
-    
-    document.getElementById("optionA").onclick = (e) => {
-        if(e.target.id === "btnAudioA") return;
-        handle(document.getElementById("labelA").innerText);
-    };
-    document.getElementById("optionB").onclick = (e) => {
-        if(e.target.id === "btnAudioB") return;
-        handle(document.getElementById("labelB").innerText);
-    };
-    
-    document.getElementById("btnAudioA").onclick = (e) => {
-        e.stopPropagation();
-        window.speechSynthesis.cancel();
-        speakText(document.getElementById("labelA").innerText);
-    };
-    document.getElementById("btnAudioB").onclick = (e) => {
-        e.stopPropagation();
-        window.speechSynthesis.cancel();
-        speakText(document.getElementById("labelB").innerText);
-    };
-    
-    document.getElementById("prevButton").onclick = () => {
-        if(state.index > 0) { state.index--; state.answers.pop(); render(); }
-    };
-    document.getElementById("replayButton").onclick = () => playGuidance();
-    document.getElementById("unknownButton").onclick = () => handle("不知道");
-};
+    document.getElementById("imageB").src = "assets/image" + q
