@@ -2,7 +2,7 @@ const FORM_ID = "1FAIpQLScXP8f1JzFq-kFYnZiLsGDUXQSQDUcE0OieeOMg4Lr6YvZzgA";
 const ENTRY_NAME = "entry.111555726";
 const ENTRY_DATA = "entry.2065308468";
 
-// 已精確對調 e3 與 e5 的圖片讀取序號，讓圖文完全一致
+// 格式：[ID, 類別, 題目, 選項A文字, 選項B文字, 正確選項(a/b), 圖片A序號, 圖片B序號]
 const questions = [
   ["h1", "衛生", "吃完飯後，我會...?", "玩玩具", "刷牙", "b", 2, 1],
   ["h2", "衛生", "睡覺前，我會...?", "洗澡", "髒髒的去睡覺", "a", 3, 4],
@@ -12,10 +12,10 @@ const questions = [
   ["h6", "衛生", "我會讓我的指甲保持…?", "乾淨短指甲", "髒髒長指甲", "a", 11, 12],
   ["e1", "運動", "我想讓身體更健康，我會⋯？", "看電視", "玩跳繩", "b", 14, 13],
   ["e2", "運動", "我想讓身體更有力氣，我會⋯？", "拍球", "看書", "a", 15, 16],
-  // ⚙️ e3 修正：圖片序號對調為 17, 18
+  // 🎯 e3 終極對齊：選項A是游泳(正確案選a)，圖片A就要配18(游泳)；選項B是玩電腦，圖片B配17(電腦)
   ["e3", "運動", "我想讓身體更健康，我會⋯？", "游泳", "玩電腦", "a", 18, 17],
   ["e4", "運動", "我想讓身體更強壯，我會⋯？", "跑步", "滑平板", "a", 19, 20],
-  // ⚙️ e5 修正：圖片序號對調為 21, 22
+  // 🎯 e5 終極對齊：選項A是玩攀爬架(正確案選a)，圖片A就要配22(攀爬架)；選項B是玩電動，圖片B配21(電動)
   ["e5", "運動", "我想讓身體更有力量，我會⋯？", "玩攀爬架", "玩電動", "a", 22, 21],
   ["e6", "運動", "我想讓身體更有力氣，我會⋯？", "騎腳踏車", "玩樂高", "a", 23, 24],
   ["n1", "營養", "哪種食物對身體好呢？", "糖果", "小番茄或切片芭樂", "b", 26, 25],
@@ -31,7 +31,7 @@ const questions = [
   ["v2", "視力", "看平板時，我的眼睛要⋯？", "緊貼著平板", "和平板保持距離", "b", 46, 45],
   ["v3", "視力", "眼睛看不清楚，我要⋯？", "去看醫生", "瞇著眼睛看", "a", 47, 48],
   ["v4", "視力", "看電視的時候，我要坐在⋯？", "在電視機正前面", "在沙發上", "b", 50, 49],
-  ["v5", "視力", "想照顧眼睛，我會吃⋯？", "彩色蔬菜", "彩色糖果", "a", 51, 52],
+  ["v5", "視力", "想照顧眼睛', '我會吃⋯？", "彩色蔬菜", "彩色糖果", "a", 51, 52],
   ["v6", "視力", "看手機時，我會在⋯？", "暗暗的地方", "亮亮的地方", "b", 54, 53],
   ["s1", "安全", "盪鞦韆時，我要⋯？", "坐著", "站著", "a", 55, 56],
   ["s2", "安全", "玩球時，我會選擇在⋯？", "在馬路邊或巷口玩球", "在公園玩球", "b", 58, 57],
@@ -39,7 +39,7 @@ const questions = [
   ["s4", "安全", "在家裡想找事情做的時候，我會…？", "手指伸進電風扇", "看書", "b", 61, 62],
   ["s5", "安全", "準備要過馬路的時候，我會…？", "牽大人的手", "自己衝過去", "a", 63, 64],
   ["s6", "安全", "當我騎腳踏車的時候，我會…？", "放手騎車", "雙手握把手", "b", 66, 65],
-  ["s7", "安全", "過馬路要看交通號誌，我會…？", "綠燈亮時走", "红燈亮時走", "a", 67, 68],
+  ["s7", "安全", "過馬路要看交通號誌，我會…？", "綠燈亮時走", "紅燈亮時走", "a", 67, 68],
   ["s8", "安全", "玩水時 push，我會⋯？", "自己去玩", "需要有大人陪", "b", 70, 69],
   ["s9", "安全", "騎腳踏車運動時，我會選擇在…？", "騎在腳踏車道", "騎在馬路中間", "a", 71, 72],
   ["s10", "安全", "搭機車出門的時候，我會…？", "不戴安全帽", "戴安全帽", "b", 74, 73],
@@ -132,33 +132,4 @@ window.onload = () => {
         if (!val) return alert("請輸入編碼");
         state.user = val;
         document.getElementById("welcomeView").classList.add("hidden");
-        document.getElementById("quizView").classList.remove("hidden");
-        render();
-    };
-    
-    document.getElementById("optionA").onclick = (e) => {
-        if(e.target.id === "btnAudioA") return;
-        handle(document.getElementById("labelA").innerText);
-    };
-    document.getElementById("optionB").onclick = (e) => {
-        if(e.target.id === "btnAudioB") return;
-        handle(document.getElementById("labelB").innerText);
-    };
-    
-    document.getElementById("btnAudioA").onclick = (e) => {
-        e.stopPropagation();
-        window.speechSynthesis.cancel();
-        speakText(document.getElementById("labelA").innerText);
-    };
-    document.getElementById("btnAudioB").onclick = (e) => {
-        e.stopPropagation();
-        window.speechSynthesis.cancel();
-        speakText(document.getElementById("labelB").innerText);
-    };
-    
-    document.getElementById("prevButton").onclick = () => {
-        if(state.index > 0) { state.index--; state.answers.pop(); render(); }
-    };
-    document.getElementById("replayButton").onclick = () => playGuidance();
-    document.getElementById("unknownButton").onclick = () => handle("不知道");
-};
+        document.getElementById("quizView").
