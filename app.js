@@ -2,7 +2,7 @@ const FORM_ID = "1FAIpQLScXP8f1JzFq-kFYnZiLsGDUXQSQDUcE0OieeOMg4Lr6YvZzgA";
 const ENTRY_NAME = "entry.111555726";
 const ENTRY_DATA = "entry.2065308468";
 
-// 已更新為您提供的最新精簡版題目與選項，並維持正確答案左右交替配置
+// 已精確對調 e3 與 e5 的圖片讀取序號，讓圖文完全一致
 const questions = [
   ["h1", "衛生", "吃完飯後，我會...?", "玩玩具", "刷牙", "b", 2, 1],
   ["h2", "衛生", "睡覺前，我會...?", "洗澡", "髒髒的去睡覺", "a", 3, 4],
@@ -12,9 +12,11 @@ const questions = [
   ["h6", "衛生", "我會讓我的指甲保持…?", "乾淨短指甲", "髒髒長指甲", "a", 11, 12],
   ["e1", "運動", "我想讓身體更健康，我會⋯？", "看電視", "玩跳繩", "b", 14, 13],
   ["e2", "運動", "我想讓身體更有力氣，我會⋯？", "拍球", "看書", "a", 15, 16],
-  ["e3", "運動", "我想讓身體更健康，我會⋯？", "游泳", "玩電腦", "a", 18, 17],
+  // ⚙️ e3 修正：圖片序號對調為 17, 18
+  ["e3", "運動", "我想讓身體更健康，我會⋯？", "游泳", "玩電腦", "a", 17, 18],
   ["e4", "運動", "我想讓身體更強壯，我會⋯？", "跑步", "滑平板", "a", 19, 20],
-  ["e5", "運動", "我想讓身體更有力量，我會⋯？", "玩攀爬架", "玩電動", "a", 22, 21],
+  // ⚙️ e5 修正：圖片序號對調為 21, 22
+  ["e5", "運動", "我想讓身體更有力量，我會⋯？", "玩攀爬架", "玩電動", "a", 21, 22],
   ["e6", "運動", "我想讓身體更有力氣，我會⋯？", "騎腳踏車", "玩樂高", "a", 23, 24],
   ["n1", "營養", "哪種食物對身體好呢？", "糖果", "小番茄或切片芭樂", "b", 26, 25],
   ["n2", "營養", "哪種食物對身體好呢？", "吃飯", "洋芋片", "a", 27, 28],
@@ -37,7 +39,7 @@ const questions = [
   ["s4", "安全", "在家裡想找事情做的時候，我會…？", "手指伸進電風扇", "看書", "b", 61, 62],
   ["s5", "安全", "準備要過馬路的時候，我會…？", "牽大人的手", "自己衝過去", "a", 63, 64],
   ["s6", "安全", "當我騎腳踏車的時候，我會…？", "放手騎車", "雙手握把手", "b", 66, 65],
-  ["s7", "安全", "過馬路要看交通號誌，我會…？", "綠燈亮時走", "紅燈亮時走", "a", 67, 68],
+  ["s7", "安全", "過馬路要看交通號誌，我會…？", "綠燈亮時走", "红燈亮時走", "a", 67, 68],
   ["s8", "安全", "玩水時 push，我會⋯？", "自己去玩", "需要有大人陪", "b", 70, 69],
   ["s9", "安全", "騎腳踏車運動時，我會選擇在…？", "騎在腳踏車道", "騎在馬路中間", "a", 71, 72],
   ["s10", "安全", "搭機車出門的時候，我會…？", "不戴安全帽", "戴安全帽", "b", 74, 73],
@@ -63,7 +65,6 @@ function playGuidance() {
     const q = questions[state.index];
     const questionText = q[2].replace(/[…？?。]/g, "");
     
-    // 語音間隔維持 0.6 秒 (600 毫秒)
     speakText(questionText, () => {
         setTimeout(() => {
             speakText(q[3], () => {
@@ -80,4 +81,84 @@ function render() {
     document.getElementById("currentNum").innerText = state.index + 1;
     document.getElementById("questionPrompt").innerText = q[2];
     document.getElementById("imageA").src = "assets/image" + q[6] + ".png";
-    document.getElementById("imageB").src = "assets/image" + q
+    document.getElementById("imageB").src = "assets/image" + q[7] + ".png";
+    document.getElementById("labelA").innerText = q[3];
+    document.getElementById("labelB").innerText = q[4];
+    document.getElementById("prevButton").style.display = (state.index > 0) ? "inline-block" : "none";
+    setTimeout(playGuidance, 500);
+}
+
+function handle(choice) {
+    window.speechSynthesis.cancel();
+    const q = questions[state.index];
+    
+    let recordValue;
+    if (choice === "不知道") {
+        recordValue = 3; 
+    } else {
+        const correctText = (q[5] === 'a') ? q[3] : q[4];
+        recordValue = (choice === correctText) ? 1 : 0;
+    }
+    
+    state.answers.push(recordValue);
+    if (state.index < questions.length - 1) {
+        state.index++; render();
+    } else {
+        submit();
+    }
+}
+
+async function submit() {
+    document.getElementById("quizView").classList.add("hidden");
+    document.getElementById("doneView").classList.remove("hidden");
+    speakText("完成囉，謝謝你的幫忙");
+    
+    let scores = { h:0, e:0, n:0, v:0, s:0, total:0 };
+    const details = state.answers.map((val, i) => {
+        const cat = questions[i][0][0];
+        if (val === 1) { scores.total++; scores[cat]++; }
+        return val;
+    });
+    const summary = [...details, scores.h, scores.e, scores.n, scores.v, scores.s, scores.total].join(",");
+    const fd = new FormData();
+    fd.append(ENTRY_NAME, state.user);
+    fd.append(ENTRY_DATA, summary);
+    await fetch(`https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`, { method:"POST", mode:"no-cors", body:fd });
+}
+
+window.onload = () => {
+    document.getElementById("startButton").onclick = () => {
+        const val = document.getElementById("userNameInput").value.trim();
+        if (!val) return alert("請輸入編碼");
+        state.user = val;
+        document.getElementById("welcomeView").classList.add("hidden");
+        document.getElementById("quizView").classList.remove("hidden");
+        render();
+    };
+    
+    document.getElementById("optionA").onclick = (e) => {
+        if(e.target.id === "btnAudioA") return;
+        handle(document.getElementById("labelA").innerText);
+    };
+    document.getElementById("optionB").onclick = (e) => {
+        if(e.target.id === "btnAudioB") return;
+        handle(document.getElementById("labelB").innerText);
+    };
+    
+    document.getElementById("btnAudioA").onclick = (e) => {
+        e.stopPropagation();
+        window.speechSynthesis.cancel();
+        speakText(document.getElementById("labelA").innerText);
+    };
+    document.getElementById("btnAudioB").onclick = (e) => {
+        e.stopPropagation();
+        window.speechSynthesis.cancel();
+        speakText(document.getElementById("labelB").innerText);
+    };
+    
+    document.getElementById("prevButton").onclick = () => {
+        if(state.index > 0) { state.index--; state.answers.pop(); render(); }
+    };
+    document.getElementById("replayButton").onclick = () => playGuidance();
+    document.getElementById("unknownButton").onclick = () => handle("不知道");
+};
