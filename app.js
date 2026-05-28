@@ -2,19 +2,19 @@ const FORM_ID = "1FAIpQLScXP8f1JzFq-kFYnZiLsGDUXQSQDUcE0OieeOMg4Lr6YvZzgA";
 const ENTRY_NAME = "entry.111555726";
 const ENTRY_DATA = "entry.2065308468";
 
-// 題目庫：已全數補上「1. 」到「42. 」的題號標識
+// [ID, 類別, 題目, 選項A文字, 選項B文字, 正確選項, 圖片A, 圖片B]
 const questions = [
   ["h1", "衛生", "1. 吃完飯後，我會...?", "玩玩具", "刷牙", "b", 2, 1],
-  ["h2", "衛生", "2. 睡覺前，我會...?", "洗澡", "髒裝的去睡覺", "a", 3, 4],
+  ["h2", "衛生", "2. 睡覺前，我會...?", "洗澡", "髒髒的去睡覺", "a", 3, 4],
   ["h3", "衛生", "3. 上廁所後，我會…?", "跑去玩", "洗手", "b", 6, 5],
   ["h4", "衛生", "4. 打噴嚏的時候，我會…?", "遮口鼻", "直接打噴嚏", "a", 7, 8],
   ["h5", "衛生", "5. 吃飯的時候，我會用….?", "髒髒餐具組", "乾淨餐具組", "b", 10, 9],
   ["h6", "衛生", "6. 我會讓我的指甲保持…?", "乾淨短指甲", "髒髒長指甲", "a", 11, 12],
   ["e1", "運動", "7. 我想讓身體更健康，我會⋯？", "看電視", "玩跳繩", "b", 14, 13],
   ["e2", "運動", "8. 我想讓身體更有力氣，我會⋯？", "拍球", "看書", "a", 15, 16],
-  ["e3", "運動", "我想讓身體更健康，我會⋯？", "游泳", "玩電腦", "a", 17, 18],
+  ["e3", "運動", "9. 我想讓身體更健康，我會⋯？", "游泳", "玩電腦", "a", 18, 17],
   ["e4", "運動", "10. 我想讓身體更強壯，我會⋯？", "跑步", "滑平板", "a", 19, 20],
-  ["e5", "運動", "我想讓身體更有力量，我會⋯？", "玩攀爬架", "玩電動", "a", 21, 22],
+  ["e5", "運動", "11. 我想讓身體更有力量，我會⋯？", "玩攀爬架", "玩電動", "a", 22, 21],
   ["e6", "運動", "12. 我想讓身體更有力氣，我會⋯？", "騎腳踏車", "玩樂高", "a", 23, 24],
   ["n1", "營養", "13. 哪種食物對身體好呢？", "糖果", "小番茄或切片芭樂", "b", 26, 25],
   ["n2", "營養", "14. 哪種食物對身體好呢？", "吃飯", "洋芋片", "a", 27, 28],
@@ -45,7 +45,7 @@ const questions = [
   ["s12", "安全", "39. 在游泳池邊玩水時，我會…？", "慢慢走", "奔跑", "a", 77, 78],
   ["s13", "安全", "40. 如果發現家裡失火冒煙了，我會…？", "站著走動", "摀住口鼻低姿勢逃生", "b", 80, 79],
   ["s14", "安全", "41. 看到顏色漂亮的小藥丸時，我會…？", "給大人", "拿來吃吃看", "a", 81, 82],
-  ["s15", "安全", "42. 如果我不小心受傷流血了，我會…", "自己躲起來哭", "找大人幫忙", "b", 84, 83]
+  ["s15", "安全", "42. 如果我不小心受傷流血了，我會…", "自己躲起來哭", "受傷了找大人幫忙", "b", 84, 83]
 ];
 
 let state = { index: 0, answers: [], user: "", classLevel: "" };
@@ -61,8 +61,6 @@ function speakText(text, callback) {
 function playGuidance() {
     window.speechSynthesis.cancel();
     const q = questions[state.index];
-    
-    // 語音播放優化：唸題目時把「1. 」「2. 」等題號文字過濾掉，避免語音唸出數字干擾幼兒
     const questionTextText = q[2].replace(/^\d+\.\s*/, "").replace(/[…？?。]/g, "");
     
     speakText(questionTextText, () => {
@@ -79,7 +77,7 @@ function playGuidance() {
 function render() {
     const q = questions[state.index];
     document.getElementById("currentNum").innerText = state.index + 1;
-    document.getElementById("questionPrompt").innerText = q[2]; // 畫面上依然顯示包含題號的文字
+    document.getElementById("questionPrompt").innerText = q[2];
     document.getElementById("imageA").src = "assets/image" + q[6] + ".png";
     document.getElementById("imageB").src = "assets/image" + q[7] + ".png";
     document.getElementById("labelA").innerText = q[3];
@@ -121,8 +119,10 @@ async function submit() {
     });
     const summary = [...details, scores.h, scores.e, scores.n, scores.v, scores.s, scores.total].join(",");
     
-    // 打包資料：將編碼與班別用底線連接（例如 "A05_中班"），統一推送到原本的姓名欄位
-    const finalIdentity = `${state.user}_${state.classLevel}`;
+    // 🔥【強化對齊指令】在送出資料前，再次從全域 state 與網頁輸入框進行最終校對
+    let finalClass = state.classLevel || document.getElementById("classLevelSelect").value || "未指定班級";
+    let finalUser = state.user || document.getElementById("userNameInput").value.trim() || "未知編碼";
+    const finalIdentity = `${finalUser}_${finalClass}`;
     
     const fd = new FormData();
     fd.append(ENTRY_NAME, finalIdentity);
@@ -170,5 +170,4 @@ window.onload = () => {
     };
     document.getElementById("replayButton").onclick = () => playGuidance();
     document.getElementById("unknownButton").onclick = () => handle("不知道");
-};
 };
