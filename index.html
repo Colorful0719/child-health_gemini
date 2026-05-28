@@ -1,152 +1,100 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>幼兒健康圖像式問卷</title>
-    <link rel="stylesheet" href="/styles.css">
-  </head>
-  <body>
-    <main class="app-shell">
-      <section class="welcome-view" id="welcomeView" aria-labelledby="appTitle">
-        <div class="brand-row">
-          <div class="mark" aria-hidden="true">✓</div>
-          <div>
-            <p class="eyebrow">幼兒健康圖像式問卷</p>
-            <h1 id="appTitle" class="sr-only">幼兒健康圖像式問卷</h1>
-          </div>
-        </div>
-        <div class="start-panel">
-          <label for="displayName">填答者名稱或班級</label>
-          <input id="displayName" type="text" autocomplete="off" placeholder="可留空，系統會自動編號">
-          <label for="classLevel">級別</label>
-          <select id="classLevel">
-            <option value="大班">大班</option>
-            <option value="中班">中班</option>
-            <option value="小班">小班</option>
-          </select>
-          <div class="welcome-actions">
-            <button class="primary-action" id="startButton" type="button">開始</button>
-            <button class="secondary-action" id="openAdminButton" type="button">後台管理</button>
-          </div>
-        </div>
-      </section>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>幼兒健康識能測驗</title>
+    <style>
+        :root { --green: #2c7a5b; --bg: #e9f5f0; --line: #d8e1e8; --coral: #f8d7cf; }
+        body { margin: 0; background: var(--bg); font-family: "Microsoft JhengHei", sans-serif; display: flex; justify-content: center; }
+        .hidden { display: none !important; }
+        .quiz-view { background: white; border-radius: 20px; padding: 30px; margin-top: 20px; width: 90%; max-width: 800px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; position: relative; min-height: 80vh; }
+        
+        /* 輸入框與標題 */
+        input { width: 80%; padding: 15px; font-size: 1.4rem; margin: 20px 0; border: 2px solid var(--line); border-radius: 12px; text-align: center; }
+        button.primary { background: var(--green); color: white; border: 0; padding: 18px; font-size: 1.5rem; border-radius: 12px; cursor: pointer; width: 100%; font-weight: bold; }
+        
+        /* 標題列控制項 */
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .header-btns { display: flex; gap: 10px; }
+        .control-btn { background: white; border: 1px solid var(--line); padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 1rem; color: #444; }
 
-      <section class="quiz-view hidden" id="quizView" aria-live="polite">
-        <header class="quiz-header">
-          <div>
-            <p class="eyebrow" id="categoryLabel">衛生</p>
-            <h2 id="questionText">題目</h2>
-          </div>
-          <div class="status-box">
-            <span id="userBadge">KID-0001</span>
-            <strong id="progressText">1 / 42</strong>
-          </div>
-        </header>
+        /* 選項圖片與佈局 */
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .picture-option { border: 3px solid var(--line); border-radius: 15px; padding: 10px; cursor: pointer; transition: transform 0.2s; position: relative; }
+        .image-frame img { width: 100%; height: auto; max-height: 35vh; object-fit: contain; border-radius: 10px; }
+        
+        /* 選項底部單獨重聽控制區 */
+        .option-footer { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
+        .option-label { font-size: 1.4rem; font-weight: bold; margin: 0; }
+        .btn-audio-small { background: var(--green); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
 
-        <div class="progress-track" aria-hidden="true">
-          <div class="progress-fill" id="progressFill"></div>
-        </div>
+        /* 🔴 不知道按鈕：嚴格固定在螢幕右下角，不會隨滾動條消失 */
+        .unknown-btn { 
+            position: fixed; 
+            right: 30px; 
+            bottom: 30px; 
+            background: var(--coral); 
+            border: 2px solid #edb7ad; 
+            padding: 15px 40px; 
+            border-radius: 50px; 
+            font-weight: bold; 
+            font-size: 1.3rem;
+            cursor: pointer; 
+            z-index: 1000; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
 
-        <div class="speech-row">
-          <button class="icon-button" id="replayButton" type="button" aria-label="重播題目與選項">
-            <span aria-hidden="true">▶</span>
-          </button>
-          <span>點一下可以再聽一次題目與選項</span>
-        </div>
+        @media (max-width: 600px) { 
+            .options-grid { grid-template-columns: 1fr; } 
+            .unknown-btn { padding: 12px 30px; font-size: 1.1rem; right: 15px; bottom: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <section id="welcomeView" class="quiz-view">
+        <h1 style="font-size: 2.5rem;">😊</h1>
+        <h1 style="color: var(--green);">幼兒健康問卷</h1>
+        <p style="color: #666; font-size: 1.2rem;">請施測者輸入受試者編碼</p>
+        <input type="text" id="userNameInput" placeholder="在此輸入座號或學號">
+        <button class="primary" id="startButton">開始測驗</button>
+    </section>
 
-        <div class="options-grid" id="optionsGrid"></div>
-        <button class="unknown-button" id="unknownButton" type="button">不知道</button>
-      </section>
-
-      <section class="done-view hidden" id="doneView">
-        <div class="done-symbol" aria-hidden="true">✓</div>
-        <h2>完成作答</h2>
-        <p id="doneText">資料已記錄。</p>
-        <button class="secondary-action" id="restartButton" type="button">新增下一位填答者</button>
-      </section>
-
-      <section class="admin-view hidden" id="adminView" aria-labelledby="adminTitle">
-        <div class="admin-header">
-          <div>
-            <p class="eyebrow">後台</p>
-            <h2 id="adminTitle">填答紀錄</h2>
-          </div>
-          <div class="admin-actions">
-            <button class="secondary-action compact" id="backToSurveyButton" type="button">返回作答</button>
-            <button class="secondary-action compact hidden" id="downloadCsvButton" type="button">下載 CSV</button>
-            <button class="secondary-action compact hidden" id="refreshAdminButton" type="button">重新整理</button>
-          </div>
-        </div>
-
-        <div class="admin-login" id="adminLogin">
-          <label for="adminPassword">後台密碼</label>
-          <div class="admin-login-row">
-            <input id="adminPassword" type="password" inputmode="numeric" autocomplete="current-password" placeholder="請輸入密碼">
-            <button class="primary-action compact" id="adminLoginButton" type="button">進入後台</button>
-          </div>
-          <p id="adminLoginMessage" class="admin-message"></p>
-        </div>
-
-        <div class="admin-content hidden" id="adminContent">
-          <section class="admin-section" aria-labelledby="overviewTitle">
-            <h3 id="overviewTitle">概覽統計</h3>
-            <div class="stat-grid" id="overviewStats"></div>
-            <div class="admin-table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>題號</th>
-                    <th>主題</th>
-                    <th>題目</th>
-                    <th>填答統計</th>
-                  </tr>
-                </thead>
-                <tbody id="overviewRows">
-                  <tr><td colspan="4">尚無資料</td></tr>
-                </tbody>
-              </table>
+    <section id="quizView" class="quiz-view hidden">
+        <div class="quiz-header">
+            <span style="font-size: 1.4rem; font-weight: bold; color: #888;"><span id="currentNum">1</span> / 42</span>
+            <div class="header-btns">
+                <button id="prevButton" class="control-btn" style="display:none;">⬅ 上一題</button>
+                <button id="replayButton" class="control-btn">🔊 重聽題目</button>
             </div>
-          </section>
-
-          <section class="admin-section" aria-labelledby="respondentTitle">
-            <h3 id="respondentTitle">填答者管理</h3>
-            <div class="admin-table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>編號</th>
-                    <th>名稱/班級</th>
-                    <th>級別</th>
-                    <th>開始時間</th>
-                    <th>完成時間</th>
-                    <th>作答數</th>
-                    <th>操作</th>
-                  </tr>
-                </thead>
-                <tbody id="respondentRows">
-                  <tr><td colspan="7">尚無資料</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <section class="admin-section" aria-labelledby="detailTitle">
-            <h3 id="detailTitle">詳細記錄</h3>
-            <div class="admin-table-wrap">
-              <table id="detailTable">
-                <thead id="detailHead"></thead>
-                <tbody id="detailRows">
-                  <tr><td>尚無資料</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
         </div>
-      </section>
-    </main>
+        <h2 id="questionPrompt" style="margin: 20px 0; font-size: 1.8rem; color: #333;">載入中...</h2>
+        <div class="options-grid">
+            <div class="picture-option" id="optionA">
+                <div class="image-frame"><img id="imageA" src="" alt="選項A"></div>
+                <div class="option-footer">
+                    <p id="labelA" class="option-label"></p>
+                    <button class="btn-audio-small" id="btnAudioA" type="button">▶</button>
+                </div>
+            </div>
+            <div class="picture-option" id="optionB">
+                <div class="image-frame"><img id="imageB" src="" alt="選項B"></div>
+                <div class="option-footer">
+                    <p id="labelB" class="option-label"></p>
+                    <button class="btn-audio-small" id="btnAudioB" type="button">▶</button>
+                </div>
+            </div>
+        </div>
+        <button id="unknownButton" class="unknown-btn">不知道</button>
+    </section>
 
-    <script src="/app.js"></script>
-  </body>
+    <section id="doneView" class="quiz-view hidden" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <h2 style="font-size: 5rem;">✅</h2>
+        <h2 style="color: var(--green);">完成作答！</h2>
+        <p style="color: #666;">謝謝你的參與，資料已成功送出。</p>
+        <button class="primary" onclick="location.reload()" style="max-width: 300px; margin-top: 30px;">返回首頁</button>
+    </section>
+
+    <script src="app.js"></script>
+</body>
 </html>
-
