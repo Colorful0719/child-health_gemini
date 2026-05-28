@@ -10,9 +10,9 @@
         .hidden { display: none !important; }
         .quiz-view { background: white; border-radius: 20px; padding: 30px; margin-top: 20px; width: 90%; max-width: 800px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; position: relative; min-height: 80vh; }
         
-        /* 輸入框與標題 */
-        input { width: 80%; padding: 15px; font-size: 1.4rem; margin: 20px 0; border: 2px solid var(--line); border-radius: 12px; text-align: center; }
-        button.primary { background: var(--green); color: white; border: 0; padding: 18px; font-size: 1.5rem; border-radius: 12px; cursor: pointer; width: 100%; font-weight: bold; }
+        /* 輸入框與下拉選單樣式 */
+        input, select { width: 80%; padding: 15px; font-size: 1.4rem; margin: 10px 0 20px 0; border: 2px solid var(--line); border-radius: 12px; text-align: center; text-align-last: center; background: white; }
+        button.primary { background: var(--green); color: white; border: 0; padding: 18px; font-size: 1.5rem; border-radius: 12px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; }
         
         /* 標題列控制項 */
         .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -29,7 +29,7 @@
         .option-label { font-size: 1.4rem; font-weight: bold; margin: 0; }
         .btn-audio-small { background: var(--green); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
 
-        /* 🔴 不知道按鈕：嚴格固定在螢幕右下角，不會隨滾動條消失 */
+        /* 🔴 不知道按鈕固定在螢幕右下角 */
         .unknown-btn { 
             position: fixed; 
             right: 30px; 
@@ -55,7 +55,14 @@
     <section id="welcomeView" class="quiz-view">
         <h1 style="font-size: 2.5rem;">😊</h1>
         <h1 style="color: var(--green);">幼兒健康問卷</h1>
-        <p style="color: #666; font-size: 1.2rem;">請施測者輸入受試者編碼</p>
+        <p style="color: #666; font-size: 1.2rem; margin-bottom: 5px;">請選擇幼兒班別</p>
+        <select id="classLevelSelect">
+            <option value="" disabled selected>--- 點擊選擇班別 ---</option>
+            <option value="大班">大班</option>
+            <option value="中班">中班</option>
+            <option value="小班">小班</option>
+        </select>
+        <p style="color: #666; font-size: 1.2rem; margin-bottom: 5px;">請施測者輸入受試者編碼</p>
         <input type="text" id="userNameInput" placeholder="在此輸入座號或學號">
         <button class="primary" id="startButton">開始測驗</button>
     </section>
