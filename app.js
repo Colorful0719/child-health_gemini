@@ -92,9 +92,10 @@ function render() {
     
     document.getElementById("questionPrompt").innerText = q[2];
     
+    // 🛠️ 核心修正：將練習題的圖片路徑加上大寫的 ".PNG"，正式題維持小寫 ".png"
     if (state.isPractice) {
-        document.getElementById("imageA").src = "assets/" + q[6] + ".png";
-        document.getElementById("imageB").src = "assets/" + q[7] + ".png";
+        document.getElementById("imageA").src = "assets/" + q[6] + ".PNG";
+        document.getElementById("imageB").src = "assets/" + q[7] + ".PNG";
     } else {
         document.getElementById("imageA").src = "assets/image" + q[6] + ".png";
         document.getElementById("imageB").src = "assets/image" + q[7] + ".png";
@@ -159,18 +160,13 @@ async function submit() {
     });
     const summary = [...details, scores.h, scores.e, scores.n, scores.v, scores.s, scores.total].join(",");
     
-    // 取得當前的中文字班別
     let currentClass = state.classLevel || document.getElementById("classLevelSelect").value || "";
-    
-    // ⭐【核心轉換】將大中小班文字轉化成您指定的數字代碼 (1=小班, 2=中班, 3=大班)
-    let classCode = "0"; // 預設值以防出錯
+    let classCode = "0"; 
     if (currentClass === "小班") classCode = "1";
     else if (currentClass === "中班") classCode = "2";
     else if (currentClass === "大班") classCode = "3";
     
     let finalUser = state.user || document.getElementById("userNameInput").value.trim() || "未知編碼";
-    
-    // 打包傳送，例如原本 "05_大班" 會轉化成 "05_3" 寫入後台
     const finalIdentity = `${finalUser}_${classCode}`;
     
     const fd = new FormData();
