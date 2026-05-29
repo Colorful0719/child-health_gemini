@@ -2,8 +2,7 @@ const FORM_ID = "1FAIpQLScXP8f1JzFq-kFYnZiLsGDUXQSQDUcE0OieeOMg4Lr6YvZzgA";
 const ENTRY_NAME = "entry.111555726";
 const ENTRY_DATA = "entry.2065308468";
 
-// ⭐ 新增：練習題資料庫 [ID, 類別, 題目, 選項A文字, 選項B文字, 正確選項, 圖片A檔名, 圖片B檔名]
-// 練習題不計分、不送後台，圖片預設放在 assets/ 之下，檔名分別為 p1a, p1b 等（可自行調整）
+// 練習題資料庫 [ID, 類別, 題目, 選項A文字, 選項B文字, 正確選項, 圖片A檔名, 圖片B檔名]
 const practiceQuestions = [
   ["p1", "練習", "練習1. 玩玩具玩到一半，突然好想上廁所的時候，我會...？", "先放下玩具，跑去上廁所", "繼續玩，憋著不去上廁所", "a", "p1a", "p1b"],
   ["p2", "練習", "練習2. 剛從外面玩回來，口很渴的時候，我會...？", "先洗手，再喝水", "杯子拿起來就直接灌水", "a", "p2a", "p2b"],
@@ -56,7 +55,6 @@ const questions = [
   ["s15", "安全", "42. 如果我不小心受傷流血了，我會…", "自己躲起來哭", "受傷了找大人幫忙", "b", 84, 83]
 ];
 
-// isPractice: 是否在練習階段, pIndex: 練習題指針, index: 正式題指針
 let state = { isPractice: true, pIndex: 0, index: 0, answers: [], user: "", classLevel: "" };
 
 function speakText(text, callback) {
@@ -69,10 +67,7 @@ function speakText(text, callback) {
 
 function playGuidance() {
     window.speechSynthesis.cancel();
-    // 根據目前階段抓取題目
     const q = state.isPractice ? practiceQuestions[state.pIndex] : questions[state.index];
-    
-    // 語音過濾掉前綴數字與練習標籤
     const questionTextText = q[2].replace(/^\d+\.\s*/, "").replace(/^練習\d+\.\s*/, "").replace(/[…？?。]/g, "");
     
     speakText(questionTextText, () => {
@@ -87,10 +82,8 @@ function playGuidance() {
 }
 
 function render() {
-    // 抓取當前題目資料
     const q = state.isPractice ? practiceQuestions[state.pIndex] : questions[state.index];
     
-    // 更新畫面上方的題號進度顯示
     if (state.isPractice) {
         document.getElementById("currentNum").innerText = `練習 ${state.pIndex + 1} / ${practiceQuestions.length}`;
     } else {
@@ -99,7 +92,6 @@ function render() {
     
     document.getElementById("questionPrompt").innerText = q[2];
     
-    // 處理圖片路徑（正式題用編號數字，練習題用字串檔名）
     if (state.isPractice) {
         document.getElementById("imageA").src = "assets/" + q[6] + ".png";
         document.getElementById("imageB").src = "assets/" + q[7] + ".png";
@@ -111,7 +103,6 @@ function render() {
     document.getElementById("labelA").innerText = q[3];
     document.getElementById("labelB").innerText = q[4];
     
-    // 上一題按鈕顯示邏輯：練習題第1題不顯示，其餘皆顯示
     if (state.isPractice && state.pIndex === 0) {
         document.getElementById("prevButton").style.display = "none";
     } else {
@@ -125,19 +116,16 @@ function handle(choice) {
     window.speechSynthesis.cancel();
     
     if (state.isPractice) {
-        // 【練習題階段】點選答案純粹切換下一題，不累加、不紀錄任何分數
         if (state.pIndex < practiceQuestions.length - 1) {
             state.pIndex++; 
             render();
         } else {
-            // 練習題結束，跳出語音提示並進入正式施測
             state.isPractice = false;
             speakText("練習結束囉！現在我們要開始正式寫題目了喔！", () => {
                 render();
             });
         }
     } else {
-        // 【正式題目階段】嚴格紀錄對錯
         const q = questions[state.index];
         let recordValue;
         if (choice === "不知道") {
@@ -171,9 +159,19 @@ async function submit() {
     });
     const summary = [...details, scores.h, scores.e, scores.n, scores.v, scores.s, scores.total].join(",");
     
-    let finalClass = state.classLevel || document.getElementById("classLevelSelect").value || "未指定班級";
+    // 取得當前的中文字班別
+    let currentClass = state.classLevel || document.getElementById("classLevelSelect").value || "";
+    
+    // ⭐【核心轉換】將大中小班文字轉化成您指定的數字代碼 (1=小班, 2=中班, 3=大班)
+    let classCode = "0"; // 預設值以防出錯
+    if (currentClass === "小班") classCode = "1";
+    else if (currentClass === "中班") classCode = "2";
+    else if (currentClass === "大班") classCode = "3";
+    
     let finalUser = state.user || document.getElementById("userNameInput").value.trim() || "未知編碼";
-    const finalIdentity = `${finalUser}_${finalClass}`;
+    
+    // 打包傳送，例如原本 "05_大班" 會轉化成 "05_3" 寫入後台
+    const finalIdentity = `${finalUser}_${classCode}`;
     
     const fd = new FormData();
     fd.append(ENTRY_NAME, finalIdentity);
@@ -191,7 +189,6 @@ window.onload = () => {
         
         state.classLevel = lv;
         state.user = val;
-        // 重置為練習模式開頭
         state.isPractice = true;
         state.pIndex = 0;
         state.index = 0;
@@ -231,7 +228,6 @@ window.onload = () => {
                 state.answers.pop(); 
                 render(); 
             } else {
-                // 如果在正式第1題按返回，退回練習題最後一題
                 state.isPractice = true;
                 state.pIndex = practiceQuestions.length - 1;
                 render();
