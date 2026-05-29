@@ -2,7 +2,6 @@ const FORM_ID = "1FAIpQLScXP8f1JzFq-kFYnZiLsGDUXQSQDUcE0OieeOMg4Lr6YvZzgA";
 const ENTRY_NAME = "entry.111555726";
 const ENTRY_DATA = "entry.2065308468";
 
-// 🛠️ 練習題改用純數字編號 (85 到 90)，完美避開大小寫副檔名死結
 const practiceQuestions = [
   ["p1", "練習", "練習1. 玩玩具玩到一半，突然好想上廁所的時候，我會...？", "先放下玩具，跑去上廁所", "繼續玩，憋著不去上廁所", "a", "p1a.png", "p1b.png"],
   ["p2", "練習", "練習2. 剛從外面玩回來，口很渴的時候，我會...？", "先洗手，再喝水", "杯子拿起來就直接灌水", "a", "p2a.png", "p2b.png"],
@@ -55,21 +54,32 @@ const questions = [
   ["s15", "安全", "42. 如果我不小心受傷流血了，我會…", "自己躲起來哭", "受傷了找大人幫忙", "b", 84, 83]
 ];
 
-let state = { isPractice: true, pIndex: 0, index: 0, answers: [], user: "", classLevel: "" };
+let state = {
+    isPractice: true,
+    pIndex: 0,
+    index: 0,
+    answers: [],
+    user: "",
+    classLevel: ""
+};
 
 function speakText(text, callback) {
     const u = new SpeechSynthesisUtterance(text);
     u.lang = "zh-TW";
-    u.rate = 0.85; 
+    u.rate = 0.85;
     if (callback) u.onend = callback;
     window.speechSynthesis.speak(u);
 }
 
 function playGuidance() {
     window.speechSynthesis.cancel();
+
     const q = state.isPractice ? practiceQuestions[state.pIndex] : questions[state.index];
-    const questionTextText = q[2].replace(/^\d+\.\s*/, "").replace(/^練習\d+\.\s*/, "").replace(/[…？?。]/g, "");
-    
+    const questionTextText = q[2]
+        .replace(/^\d+\.\s*/, "")
+        .replace(/^練習\d+\.\s*/, "")
+        .replace(/[…？?。]/g, "");
+
     speakText(questionTextText, () => {
         setTimeout(() => {
             speakText(q[3], () => {
@@ -83,37 +93,41 @@ function playGuidance() {
 
 function render() {
     const q = state.isPractice ? practiceQuestions[state.pIndex] : questions[state.index];
-    
+
     if (state.isPractice) {
         document.getElementById("currentNum").innerText = `練習 ${state.pIndex + 1} / ${practiceQuestions.length}`;
     } else {
         document.getElementById("currentNum").innerText = `${state.index + 1} / ${questions.length}`;
     }
-    
+
     document.getElementById("questionPrompt").innerText = q[2];
-    
-    // 統一讀取邏輯：不論練習或正式題，圖片路徑一律抓 assets/imageXX.png
-    document.getElementById("imageA").src = "assets/image" + q[6] + ".png";
-    document.getElementById("imageB").src = "assets/image" + q[7] + ".png";
-    
+
+    document.getElementById("imageA").src = state.isPractice
+        ? "assets/" + q[6]
+        : "assets/image" + q[6] + ".png";
+
+    document.getElementById("imageB").src = state.isPractice
+        ? "assets/" + q[7]
+        : "assets/image" + q[7] + ".png";
+
     document.getElementById("labelA").innerText = q[3];
     document.getElementById("labelB").innerText = q[4];
-    
+
     if (state.isPractice && state.pIndex === 0) {
         document.getElementById("prevButton").style.display = "none";
     } else {
         document.getElementById("prevButton").style.display = "inline-block";
     }
-    
+
     setTimeout(playGuidance, 500);
 }
 
 function handle(choice) {
     window.speechSynthesis.cancel();
-    
+
     if (state.isPractice) {
         if (state.pIndex < practiceQuestions.length - 1) {
-            state.pIndex++; 
+            state.pIndex++;
             render();
         } else {
             state.isPractice = false;
@@ -124,17 +138,18 @@ function handle(choice) {
     } else {
         const q = questions[state.index];
         let recordValue;
+
         if (choice === "不知道") {
-            recordValue = 3; 
+            recordValue = 3;
         } else {
-            const correctText = (q[5] === 'a') ? q[3] : q[4];
-            recordValue = (choice === correctText) ? 1 : 0;
+            const correctText = q[5] === "a" ? q[3] : q[4];
+            recordValue = choice === correctText ? 1 : 0;
         }
-        
+
         state.answers.push(recordValue);
-        
+
         if (state.index < questions.length - 1) {
-            state.index++; 
+            state.index++;
             render();
         } else {
             submit();
@@ -146,78 +161,102 @@ async function submit() {
     document.getElementById("quizView").classList.add("hidden");
     document.getElementById("doneView").classList.remove("hidden");
     speakText("完成囉，謝謝你的幫忙");
-    
-    let scores = { h:0, e:0, n:0, v:0, s:0, total:0 };
+
+    let scores = { h: 0, e: 0, n: 0, v: 0, s: 0, total: 0 };
+
     const details = state.answers.map((val, i) => {
         const cat = questions[i][0][0];
-        if (val === 1) { scores.total++; scores[cat]++; }
+        if (val === 1) {
+            scores.total++;
+            scores[cat]++;
+        }
         return val;
     });
-    const summary = [...details, scores.h, scores.e, scores.n, scores.v, scores.s, scores.total].join(",");
-    
+
+    const summary = [
+        ...details,
+        scores.h,
+        scores.e,
+        scores.n,
+        scores.v,
+        scores.s,
+        scores.total
+    ].join(",");
+
     let currentClass = state.classLevel || document.getElementById("classLevelSelect").value || "";
-    let classCode = "0"; 
+    let classCode = "0";
+
     if (currentClass === "小班") classCode = "1";
     else if (currentClass === "中班") classCode = "2";
     else if (currentClass === "大班") classCode = "3";
-    
+
     let finalUser = state.user || document.getElementById("userNameInput").value.trim() || "未知編碼";
     const finalIdentity = `${finalUser}_${classCode}`;
-    
+
     const fd = new FormData();
     fd.append(ENTRY_NAME, finalIdentity);
     fd.append(ENTRY_DATA, summary);
-    await fetch(`https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`, { method:"POST", mode:"no-cors", body:fd });
+
+    await fetch(`https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`, {
+        method: "POST",
+        mode: "no-cors",
+        body: fd
+    });
 }
 
 window.onload = () => {
     document.getElementById("startButton").onclick = () => {
         const lv = document.getElementById("classLevelSelect").value;
         const val = document.getElementById("userNameInput").value.trim();
-        
+
         if (!lv) return alert("請選擇幼兒的級別（大班/中班/小班）");
         if (!val) return alert("請輸入受試者編碼");
-        
+
         state.classLevel = lv;
         state.user = val;
         state.isPractice = true;
         state.pIndex = 0;
         state.index = 0;
         state.answers = [];
-        
+
         document.getElementById("welcomeView").classList.add("hidden");
         document.getElementById("quizView").classList.remove("hidden");
         render();
     };
-    
+
     document.getElementById("optionA").onclick = (e) => {
-        if(e.target.id === "btnAudioA") return;
+        if (e.target.id === "btnAudioA") return;
         handle(document.getElementById("labelA").innerText);
     };
+
     document.getElementById("optionB").onclick = (e) => {
-        if(e.target.id === "btnAudioB") return;
+        if (e.target.id === "btnAudioB") return;
         handle(document.getElementById("labelB").innerText);
     };
-    
+
     document.getElementById("btnAudioA").onclick = (e) => {
         e.stopPropagation();
         window.speechSynthesis.cancel();
         speakText(document.getElementById("labelA").innerText);
     };
+
     document.getElementById("btnAudioB").onclick = (e) => {
         e.stopPropagation();
         window.speechSynthesis.cancel();
         speakText(document.getElementById("labelB").innerText);
     };
-    
+
     document.getElementById("prevButton").onclick = () => {
         if (state.isPractice) {
-            if (state.pIndex > 0) { state.pIndex--; render(); }
+            if (state.pIndex > 0) {
+                state.pIndex--;
+                render();
+            }
         } else {
             if (state.index > 0) {
-                state.index--; 
-                state.answers.pop(); 
-                render(); 
+                state.index--;
+                state.answers.pop();
+                render();
             } else {
                 state.isPractice = true;
                 state.pIndex = practiceQuestions.length - 1;
@@ -225,6 +264,7 @@ window.onload = () => {
             }
         }
     };
+
     document.getElementById("replayButton").onclick = () => playGuidance();
     document.getElementById("unknownButton").onclick = () => handle("不知道");
 };
