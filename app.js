@@ -2,7 +2,15 @@ const FORM_ID = "1FAIpQLScXP8f1JzFq-kFYnZiLsGDUXQSQDUcE0OieeOMg4Lr6YvZzgA";
 const ENTRY_NAME = "entry.111555726";
 const ENTRY_DATA = "entry.2065308468";
 
-// [ID, 類別, 題目, 選項A文字, 選項B文字, 正確選項, 圖片A, 圖片B]
+// ⭐ 新增：練習題資料庫 [ID, 類別, 題目, 選項A文字, 選項B文字, 正確選項, 圖片A檔名, 圖片B檔名]
+// 練習題不計分、不送後台，圖片預設放在 assets/ 之下，檔名分別為 p1a, p1b 等（可自行調整）
+const practiceQuestions = [
+  ["p1", "練習", "練習1. 玩玩具玩到一半，突然好想上廁所的時候，我會...？", "先放下玩具，跑去上廁所", "繼續玩，憋著不去上廁所", "a", "p1a", "p1b"],
+  ["p2", "練習", "練習2. 剛從外面玩回來，口很渴的時候，我會...？", "先洗手，再喝水", "杯子拿起來就直接灌水", "a", "p2a", "p2b"],
+  ["p3", "練習", "練習3. 在幼兒園上課時，如果覺得肚子痛痛的時候，我會...？", "舉手告訴老師", "忍耐不說，繼續坐在位子上", "a", "p3a", "p3b"]
+];
+
+// 正式題目庫（共 42 題）
 const questions = [
   ["h1", "衛生", "1. 吃完飯後，我會...?", "玩玩具", "刷牙", "b", 2, 1],
   ["h2", "衛生", "2. 睡覺前，我會...?", "洗澡", "髒髒的去睡覺", "a", 3, 4],
@@ -12,9 +20,9 @@ const questions = [
   ["h6", "衛生", "6. 我會讓我的指甲保持…?", "乾淨短指甲", "髒髒長指甲", "a", 11, 12],
   ["e1", "運動", "7. 我想讓身體更健康，我會⋯？", "看電視", "玩跳繩", "b", 14, 13],
   ["e2", "運動", "8. 我想讓身體更有力氣，我會⋯？", "拍球", "看書", "a", 15, 16],
- ["e3", "運動", "9. 我想讓身體更健康，我會⋯？", "游泳", "玩電腦", "a", 17, 18],
+  ["e3", "運動", "9. 我想讓身體更健康，我會⋯？", "游泳", "玩電腦", "a", 18, 17],
   ["e4", "運動", "10. 我想讓身體更強壯，我會⋯？", "跑步", "滑平板", "a", 19, 20],
- ["e5", "運動", "11. 我想讓身體更有力量，我會⋯？", "玩攀爬架", "玩電動", "a", 21, 22],
+  ["e5", "運動", "11. 我想讓身體更有力量，我會⋯？", "玩攀爬架", "玩電動", "a", 22, 21],
   ["e6", "運動", "12. 我想讓身體更有力氣，我會⋯？", "騎腳踏車", "玩樂高", "a", 23, 24],
   ["n1", "營養", "13. 哪種食物對身體好呢？", "糖果", "小番茄或切片芭樂", "b", 26, 25],
   ["n2", "營養", "14. 哪種食物對身體好呢？", "吃飯", "洋芋片", "a", 27, 28],
@@ -45,10 +53,11 @@ const questions = [
   ["s12", "安全", "39. 在游泳池邊玩水時，我會…？", "慢慢走", "奔跑", "a", 77, 78],
   ["s13", "安全", "40. 如果發現家裡失火冒煙了，我會…？", "站著走動", "摀住口鼻低姿勢逃生", "b", 80, 79],
   ["s14", "安全", "41. 看到顏色漂亮的小藥丸時，我會…？", "給大人", "拿來吃吃看", "a", 81, 82],
-  ["s15", "安全", "42. 如果我不小心受傷流血了，我會…", "自己躲起來哭", "找大人幫忙", "b", 84, 83]
+  ["s15", "安全", "42. 如果我不小心受傷流血了，我會…", "自己躲起來哭", "受傷了找大人幫忙", "b", 84, 83]
 ];
 
-let state = { index: 0, answers: [], user: "", classLevel: "" };
+// isPractice: 是否在練習階段, pIndex: 練習題指針, index: 正式題指針
+let state = { isPractice: true, pIndex: 0, index: 0, answers: [], user: "", classLevel: "" };
 
 function speakText(text, callback) {
     const u = new SpeechSynthesisUtterance(text);
@@ -60,8 +69,11 @@ function speakText(text, callback) {
 
 function playGuidance() {
     window.speechSynthesis.cancel();
-    const q = questions[state.index];
-    const questionTextText = q[2].replace(/^\d+\.\s*/, "").replace(/[…？?。]/g, "");
+    // 根據目前階段抓取題目
+    const q = state.isPractice ? practiceQuestions[state.pIndex] : questions[state.index];
+    
+    // 語音過濾掉前綴數字與練習標籤
+    const questionTextText = q[2].replace(/^\d+\.\s*/, "").replace(/^練習\d+\.\s*/, "").replace(/[…？?。]/g, "");
     
     speakText(questionTextText, () => {
         setTimeout(() => {
@@ -75,34 +87,74 @@ function playGuidance() {
 }
 
 function render() {
-    const q = questions[state.index];
-    document.getElementById("currentNum").innerText = state.index + 1;
+    // 抓取當前題目資料
+    const q = state.isPractice ? practiceQuestions[state.pIndex] : questions[state.index];
+    
+    // 更新畫面上方的題號進度顯示
+    if (state.isPractice) {
+        document.getElementById("currentNum").innerText = `練習 ${state.pIndex + 1} / ${practiceQuestions.length}`;
+    } else {
+        document.getElementById("currentNum").innerText = `${state.index + 1} / ${questions.length}`;
+    }
+    
     document.getElementById("questionPrompt").innerText = q[2];
-    document.getElementById("imageA").src = "assets/image" + q[6] + ".png";
-    document.getElementById("imageB").src = "assets/image" + q[7] + ".png";
+    
+    // 處理圖片路徑（正式題用編號數字，練習題用字串檔名）
+    if (state.isPractice) {
+        document.getElementById("imageA").src = "assets/" + q[6] + ".png";
+        document.getElementById("imageB").src = "assets/" + q[7] + ".png";
+    } else {
+        document.getElementById("imageA").src = "assets/image" + q[6] + ".png";
+        document.getElementById("imageB").src = "assets/image" + q[7] + ".png";
+    }
+    
     document.getElementById("labelA").innerText = q[3];
     document.getElementById("labelB").innerText = q[4];
-    document.getElementById("prevButton").style.display = (state.index > 0) ? "inline-block" : "none";
+    
+    // 上一題按鈕顯示邏輯：練習題第1題不顯示，其餘皆顯示
+    if (state.isPractice && state.pIndex === 0) {
+        document.getElementById("prevButton").style.display = "none";
+    } else {
+        document.getElementById("prevButton").style.display = "inline-block";
+    }
+    
     setTimeout(playGuidance, 500);
 }
 
 function handle(choice) {
     window.speechSynthesis.cancel();
-    const q = questions[state.index];
     
-    let recordValue;
-    if (choice === "不知道") {
-        recordValue = 3; 
+    if (state.isPractice) {
+        // 【練習題階段】點選答案純粹切換下一題，不累加、不紀錄任何分數
+        if (state.pIndex < practiceQuestions.length - 1) {
+            state.pIndex++; 
+            render();
+        } else {
+            // 練習題結束，跳出語音提示並進入正式施測
+            state.isPractice = false;
+            speakText("練習結束囉！現在我們要開始正式寫題目了喔！", () => {
+                render();
+            });
+        }
     } else {
-        const correctText = (q[5] === 'a') ? q[3] : q[4];
-        recordValue = (choice === correctText) ? 1 : 0;
-    }
-    
-    state.answers.push(recordValue);
-    if (state.index < questions.length - 1) {
-        state.index++; render();
-    } else {
-        submit();
+        // 【正式題目階段】嚴格紀錄對錯
+        const q = questions[state.index];
+        let recordValue;
+        if (choice === "不知道") {
+            recordValue = 3; 
+        } else {
+            const correctText = (q[5] === 'a') ? q[3] : q[4];
+            recordValue = (choice === correctText) ? 1 : 0;
+        }
+        
+        state.answers.push(recordValue);
+        
+        if (state.index < questions.length - 1) {
+            state.index++; 
+            render();
+        } else {
+            submit();
+        }
     }
 }
 
@@ -119,7 +171,6 @@ async function submit() {
     });
     const summary = [...details, scores.h, scores.e, scores.n, scores.v, scores.s, scores.total].join(",");
     
-    // 🔥【強化對齊指令】在送出資料前，再次從全域 state 與網頁輸入框進行最終校對
     let finalClass = state.classLevel || document.getElementById("classLevelSelect").value || "未指定班級";
     let finalUser = state.user || document.getElementById("userNameInput").value.trim() || "未知編碼";
     const finalIdentity = `${finalUser}_${finalClass}`;
@@ -140,6 +191,12 @@ window.onload = () => {
         
         state.classLevel = lv;
         state.user = val;
+        // 重置為練習模式開頭
+        state.isPractice = true;
+        state.pIndex = 0;
+        state.index = 0;
+        state.answers = [];
+        
         document.getElementById("welcomeView").classList.add("hidden");
         document.getElementById("quizView").classList.remove("hidden");
         render();
@@ -166,7 +223,20 @@ window.onload = () => {
     };
     
     document.getElementById("prevButton").onclick = () => {
-        if(state.index > 0) { state.index--; state.answers.pop(); render(); }
+        if (state.isPractice) {
+            if (state.pIndex > 0) { state.pIndex--; render(); }
+        } else {
+            if (state.index > 0) {
+                state.index--; 
+                state.answers.pop(); 
+                render(); 
+            } else {
+                // 如果在正式第1題按返回，退回練習題最後一題
+                state.isPractice = true;
+                state.pIndex = practiceQuestions.length - 1;
+                render();
+            }
+        }
     };
     document.getElementById("replayButton").onclick = () => playGuidance();
     document.getElementById("unknownButton").onclick = () => handle("不知道");
