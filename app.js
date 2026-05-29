@@ -2,11 +2,11 @@ const FORM_ID = "1FAIpQLScXP8f1JzFq-kFYnZiLsGDUXQSQDUcE0OieeOMg4Lr6YvZzgA";
 const ENTRY_NAME = "entry.111555726";
 const ENTRY_DATA = "entry.2065308468";
 
-// 練習題資料庫 [ID, 類別, 題目, 選項A文字, 選項B文字, 正確選項, 圖片A檔名, 圖片B檔名]
+// 🛠️ 練習題改用純數字編號 (85 到 90)，完美避開大小寫副檔名死結
 const practiceQuestions = [
-  ["p1", "練習", "練習1. 玩玩具玩到一半，突然好想上廁所的時候，我會...？", "先放下玩具，跑去上廁所", "繼續玩，憋著不去上廁所", "a", "p1a", "p1b"],
-  ["p2", "練習", "練習2. 剛從外面玩回來，口很渴的時候，我會...？", "先洗手，再喝水", "杯子拿起來就直接灌水", "a", "p2a", "p2b"],
-  ["p3", "練習", "練習3. 在幼兒園上課時，如果覺得肚子痛痛的時候，我會...？", "舉手告訴老師", "忍耐不說，繼續坐在位子上", "a", "p3a", "p3b"]
+  ["p1", "練習", "練習1. 玩玩具玩到一半，突然好想上廁所的時候，我會...？", "先放下玩具，跑去上廁所", "繼續玩，憋著不去上廁所", "a", 85, 86],
+  ["p2", "練習", "練習2. 剛從外面玩回來，口很渴的時候，我會...？", "先洗手，再喝水", "杯子拿起來就直接灌水", "a", 87, 88],
+  ["p3", "練習", "練習3. 在幼兒園上課時，如果覺得肚子痛痛的時候，我會...？", "舉手告訴老師", "忍耐不說，繼續坐在位子上", "a", 89, 90]
 ];
 
 // 正式題目庫（共 42 題）
@@ -92,14 +92,9 @@ function render() {
     
     document.getElementById("questionPrompt").innerText = q[2];
     
-    // 🛠️ 核心修正：將練習題的圖片路徑加上大寫的 ".PNG"，正式題維持小寫 ".png"
-    if (state.isPractice) {
-        document.getElementById("imageA").src = "assets/" + q[6] + ".PNG";
-        document.getElementById("imageB").src = "assets/" + q[7] + ".PNG";
-    } else {
-        document.getElementById("imageA").src = "assets/image" + q[6] + ".png";
-        document.getElementById("imageB").src = "assets/image" + q[7] + ".png";
-    }
+    // 統一讀取邏輯：不論練習或正式題，圖片路徑一律抓 assets/imageXX.png
+    document.getElementById("imageA").src = "assets/image" + q[6] + ".png";
+    document.getElementById("imageB").src = "assets/image" + q[7] + ".png";
     
     document.getElementById("labelA").innerText = q[3];
     document.getElementById("labelB").innerText = q[4];
