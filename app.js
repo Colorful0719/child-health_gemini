@@ -95,9 +95,9 @@ function render() {
     const q = state.isPractice ? practiceQuestions[state.pIndex] : questions[state.index];
 
     if (state.isPractice) {
-        document.getElementById("currentNum").innerText = `練習 ${state.pIndex + 1} / ${practiceQuestions.length}`;
+        document.getElementById("currentNum").innerText = `${state.pIndex + 1}/${practiceQuestions.length}`;
     } else {
-        document.getElementById("currentNum").innerText = `${state.index + 1} / ${questions.length}`;
+        document.getElementById("currentNum").innerText = `${state.index + 1}/${questions.length}`;
     }
 
     document.getElementById("questionPrompt").innerText = q[2];
