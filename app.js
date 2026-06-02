@@ -2,7 +2,7 @@ const FORM_ID = "1FAIpQLScXP8f1JzFq-kFYnZiLsGDUXQSQDUcE0OieeOMg4Lr6YvZzgA";
 const ENTRY_NAME = "entry.111555726";
 const ENTRY_DATA = "entry.2065308468";
 
-// ⭐ 完全採用妳指定的直覺型英文圖檔名稱呈現格式
+// 練習題資料庫：維持 p1a.png, p1b.png 英文格式
 const practiceQuestions = [
   ["p1", "練習", "練習1. 玩玩具玩到一半，突然好想上廁所的時候，我會...？", "先放下玩具，跑去上廁所", "繼續玩，憋著不去上廁所", "a", "p1a.png", "p1b.png"],
   ["p2", "練習", "練習2. 剛從外面玩回來，口很渴的時候，我會...？", "先洗手，再喝水", "杯子拿起來就直接灌水", "a", "p2a.png", "p2b.png"],
@@ -62,14 +62,16 @@ function getCurrentTimeFormatted() {
     const hrs = String(now.getHours()).padStart(2, '0');
     const mins = String(now.getMinutes()).padStart(2, '0');
     const secs = String(now.getSeconds()).padStart(2, '0');
-    return `${hrs}:${mins}:${secs}`;
+    return hrs + ":" + mins + ":" + secs;
 }
 
 function speakText(text, callback) {
     const u = new SpeechSynthesisUtterance(text);
     u.lang = "zh-TW";
     u.rate = 0.85; 
-    if (callback) u.onend = callback;
+    if (callback) {
+        u.onend = callback;
+    }
     window.speechSynthesis.speak(u);
 }
 
@@ -78,10 +80,10 @@ function playGuidance() {
     const q = state.isPractice ? practiceQuestions[state.pIndex] : questions[state.index];
     const questionTextText = q[2].replace(/^\d+\.\s*/, "").replace(/^練習\d+\.\s*/, "").replace(/[…？?。]/g, "");
     
-    speakText(questionTextText, () => {
-        setTimeout(() => {
-            speakText(q[3], () => {
-                setTimeout(() => {
+    speakText(questionTextText, function() {
+        setTimeout(function() {
+            speakText(q[3], function() {
+                setTimeout(function() {
                     speakText(q[4]);
                 }, 600);
             });
@@ -92,16 +94,18 @@ function playGuidance() {
 function render() {
     const q = state.isPractice ? practiceQuestions[state.pIndex] : questions[state.index];
     
-    const headerSpan = document.getElementById("currentNum").parentNode;
-    if (state.isPractice) {
-        headerSpan.innerHTML = `<span id="currentNum">練習 ${state.pIndex + 1} / ${practiceQuestions.length}</span>`;
-    } else {
-        headerSpan.innerHTML = `<span id="currentNum">第 ${state.index + 1} / ${questions.length} 題</span>`;
+    // 🛠️ 修正排版，精確獲取父層，確保下一題、上一題按鈕不會因為 innerHTML 重寫而被洗掉
+    const numSpan = document.getElementById("currentNum");
+    if (numSpan) {
+        if (state.isPractice) {
+            numSpan.innerText = "練習 " + (state.pIndex + 1) + " / " + practiceQuestions.length;
+        } else {
+            numSpan.innerText = "第 " + (state.index + 1) + " / " + questions.length + " 題";
+        }
     }
     
     document.getElementById("questionPrompt").innerText = q[2];
     
-    // 🛠️ 動態圖片路徑：練習題讀取 "assets/p1a.png"，正式題讀取 "assets/image1.png"
     if (state.isPractice) {
         document.getElementById("imageA").src = "assets/" + q[6];
         document.getElementById("imageB").src = "assets/" + q[7];
@@ -131,7 +135,7 @@ function handle(choice) {
             render();
         } else {
             state.isPractice = false;
-            speakText("練習結束囉！現在我們要開始正式寫題目了喔！", () => {
+            speakText("練習結束囉！現在我們要開始正式寫題目了喔！", function() {
                 render();
             });
         }
@@ -157,101 +161,18 @@ function handle(choice) {
     }
 }
 
-async function submit() {
+function submit() {
     document.getElementById("quizView").classList.add("hidden");
     document.getElementById("doneView").classList.remove("hidden");
     speakText("完成囉，謝謝你的幫忙");
     
     let scores = { h:0, e:0, n:0, v:0, s:0, total:0 };
-    const details = state.answers.map((val, i) => {
+    const details = state.answers.map(function(val, i) {
         const cat = questions[i][0][0];
         if (val === 1) { scores.total++; scores[cat]++; }
         return val;
     });
     
-    const summary = [
-        ...details, 
-        scores.h, scores.e, scores.n, scores.v, scores.s, scores.total,
-        state.startTime, 
-        state.endTime
-    ].join(",");
-    
-    let currentClass = state.classLevel || document.getElementById("classLevelSelect").value || "";
-    let classCode = "0"; 
-    if (currentClass === "小班") classCode = "1";
-    else if (currentClass === "中班") classCode = "2";
-    else if (currentClass === "大班") classCode = "3";
-    
-    let finalUser = state.user || document.getElementById("userNameInput").value.trim() || "未知編碼";
-    const finalIdentity = `${finalUser}_${classCode}`;
-    
-    const fd = new FormData();
-    fd.append(ENTRY_NAME, finalIdentity);
-    fd.append(ENTRY_DATA, summary);
-    await fetch(`https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`, { method:"POST", mode:"no-cors", body:fd });
-}
-
-window.onload = () => {
-    document.getElementById("startButton").onclick = () => {
-        const lv = document.getElementById("classLevelSelect").value;
-        const val = document.getElementById("userNameInput").value.trim();
-        
-        if (!lv) return alert("請選擇幼兒的級別（大班/中班/小班）");
-        if (!val) return alert("請輸入受試者編碼");
-        
-        state.classLevel = lv;
-        state.user = val;
-        state.isPractice = true;
-        state.pIndex = 0;
-        state.index = 0;
-        state.answers = [];
-        state.startTime = getCurrentTimeFormatted();
-        
-        document.getElementById("welcomeView").classList.add("hidden");
-        document.getElementById("quizView").classList.remove("hidden");
-        render();
-    };
-    
-    document.getElementById("optionA").onclick = (e) => {
-        if(e.target.id === "btnAudioA") return;
-        handle(document.getElementById("labelA").innerText);
-    };
-    document.getElementById("optionB").onclick = (e) => {
-        if(e.target.id === "btnAudioB") return;
-        handle(document.getElementById("labelB").innerText);
-    };
-    
-    document.getElementById("btnAudioA").onclick = (e) => {
-        e.stopPropagation();
-        window.speechSynthesis.cancel();
-        speakText(document.getElementById("labelA").innerText);
-    };
-    document.getElementById("btnAudioB").onclick = (e) => {
-        e.stopPropagation();
-        window.speechSynthesis.cancel();
-        speakText(document.getElementById("labelB").innerText);
-    };
-    
-    document.getElementById("prevButton").onclick = () => {
-        if (state.isPractice) {
-            if (state.pIndex > 0) { state.pIndex--; render(); }
-        } else {
-            if (state.index > 0) {
-                state.index--; 
-                state.answers.pop(); 
-                render(); 
-            } else {
-                state.isPractice = true;
-                state.pIndex = practiceQuestions.length - 1;
-                render();
-            }
-        }
-    };
-
-    document.getElementById("nextButton").onclick = () => {
-        handle("unknown");
-    };
-
-    document.getElementById("replayButton").onclick = () => playGuidance();
+    const summary =ick = () => playGuidance();
     document.getElementById("unknownButton").onclick = () => handle("unknown");
 };
