@@ -2,11 +2,11 @@ const FORM_ID = "1FAIpQLScXP8f1JzFq-kFYnZiLsGDUXQSQDUcE0OieeOMg4Lr6YvZzgA";
 const ENTRY_NAME = "entry.111555726";
 const ENTRY_DATA = "entry.2065308468";
 
-// 練習題資料庫 [ID, 類別, 題目, 選項A文字, 選項B文字, 正確選項, 圖片A, 圖片B]
+// 練習題資料庫
 const practiceQuestions = [
-  ["p1", "練習", "練習1. 玩玩具玩到一半，突然好想上廁所的時候，我會...？", "先放下玩具，跑去上廁所", "繼續玩，憋著不去上廁所", "a", 85, 86],
-  ["p2", "練習", "練習2. 剛從外面玩回來，口很渴的時候，我會...？", "先洗手，再喝水", "杯子拿起來就直接灌水", "a", 87, 88],
-  ["p3", "練習", "練習3. 在幼兒園上課時，如果覺得肚子痛痛的時候，我會...？", "舉手告訴老師", "忍耐不說，繼續坐在位子上", "a", 89, 90]
+  ["p1", "練習", "練習1. 玩玩具玩到一半，突然好想上廁所的時候，我會...？", "先放下玩具，跑去上廁所", "繼續玩，憋著不去上廁所", "a", "p1a.png", "p1b.png"],
+  ["p2", "練習", "練習2. 剛從外面玩回來，口很渴的時候，我會...？", "先洗手，再喝水", "杯子拿起來就直接灌水", "a", "p2a.png", "p2b.png"],
+  ["p3", "練習", "練習3. 在幼兒園上課時，如果覺得肚子痛痛的時候，我會...？", "舉手告訴老師", "忍耐不說，繼續坐在位子上", "a", "p3a.png", "p3b.png"]
 ];
 
 // 正式題目庫（共 42 題）
@@ -34,7 +34,7 @@ const questions = [
   ["n9", "營養", "21. 哪種點心對身體好呢？", "蛋糕", "蘋果", "b", 42, 41],
   ["v1", "視力", "22. 想讓眼睛休息的時候，我可以⋯？", "眼睛看遠方", "揉眼睛", "a", 43, 44],
   ["v2", "視力", "23. 看平板時，我的眼睛要⋯？", "緊貼著平板", "和平板保持距離", "b", 46, 45],
-  ["v3", "視力", "24. 眼睛看不清楚，我要⋯？", "去看醫生", "瞇著眼睛看", "a", 47, 48],
+  ["v3", "視力", "24. 眼睛看不清楚，漸漸要⋯？", "去看醫生", "瞇著眼睛看", "a", 47, 48],
   ["v4", "視力", "25. 看電視的時候，我要坐在⋯？", "在電視機正前面", "在沙發上", "b", 50, 49],
   ["v5", "視力", "26. 想照顧眼睛，我會吃⋯？", "彩色蔬菜", "彩色糖果", "a", 51, 52],
   ["v6", "視力", "27. 看手機時，我會在⋯？", "暗暗的地方", "亮亮的地方", "b", 54, 53],
@@ -49,16 +49,14 @@ const questions = [
   ["s9", "安全", "36. 騎腳踏車運動時，我會選擇在…？", "騎在腳踏車道", "騎在馬路中間", "a", 71, 72],
   ["s10", "安全", "37. 搭機車出門的時候，我會…？", "不戴安全帽", "戴安全帽", "b", 74, 73],
   ["s11", "安全", "38. 如果看到地上有打火機，我會…？", "玩打火機", "把打火機交給大人", "b", 75, 76],
-  ["s12", "安全", "39. 在游泳池邊玩水時 abuse，我會…？", "慢慢走", "奔跑", "a", 77, 78],
+  ["s12", "安全", "39. 在游泳池邊玩水時，我會…？", "慢慢走", "奔跑", "a", 77, 78],
   ["s13", "安全", "40. 如果發現家裡失火冒煙了，我會…？", "站著走動", "摀住口鼻低姿勢逃生", "b", 80, 79],
   ["s14", "安全", "41. 看到顏色漂亮的小藥丸時，我會…？", "給大人", "拿來吃吃看", "a", 81, 82],
   ["s15", "安全", "42. 如果我不小心受傷流血了，我會…", "自己躲起來哭", "找大人幫忙", "b", 84, 83]
 ];
 
-// ⭐ 新增：startTime 與 endTime 變數來記錄時間戳記
 let state = { isPractice: true, pIndex: 0, index: 0, answers: [], user: "", classLevel: "", startTime: "", endTime: "" };
 
-// 輔助函式：將目前的系統時間格式化為 "HH:MM:SS" (時:分:秒)
 function getCurrentTimeFormatted() {
     const now = new Date();
     const hrs = String(now.getHours()).padStart(2, '0');
@@ -147,7 +145,6 @@ function handle(choice) {
             state.index++; 
             render();
         } else {
-            // ⭐ 點完最後一題時，立刻在背景記錄結束時間
             state.endTime = getCurrentTimeFormatted();
             submit();
         }
@@ -166,8 +163,6 @@ async function submit() {
         return val;
     });
     
-    // ⭐【時間打包邏輯】將「開始時間」與「結束時間」串接在數據字串的最尾端
-    // 輸出格式： 42題答案, 各維度得分, 總分, 開始時間, 結束時間
     const summary = [
         ...details, 
         scores.h, scores.e, scores.n, scores.v, scores.s, scores.total,
@@ -204,8 +199,6 @@ window.onload = () => {
         state.pIndex = 0;
         state.index = 0;
         state.answers = [];
-        
-        // ⭐ 點擊開始按鈕的瞬間，立刻在背景記錄開始時間
         state.startTime = getCurrentTimeFormatted();
         
         document.getElementById("welcomeView").classList.add("hidden");
@@ -248,6 +241,16 @@ window.onload = () => {
             }
         }
     };
+
+    // ⭐ 新增：「下一題 ➡」按鈕的點擊事件
+    document.getElementById("nextButton").onclick = () => {
+        // 直接調用「不知道」的 handle 函數，確保正式題階段會自動塞入 3，且不會漏題漏欄位
+        handle("不知道");
+    };
+
+    document.getElementById("replayButton").onclick = () => playGuidance();
+    document.getElementById("unknownButton").onclick = () => handle("不知道");
+};
     document.getElementById("replayButton").onclick = () => playGuidance();
     document.getElementById("unknownButton").onclick = () => handle("不知道");
 };
