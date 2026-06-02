@@ -30,7 +30,6 @@ body {
     min-height: 80vh; 
 }
 
-/* 輸入框與下拉選單樣式 */
 input, select { 
     width: 80%; 
     padding: 15px; 
@@ -56,7 +55,6 @@ button.primary {
     margin-top: 10px; 
 }
 
-/* 標題列控制項 */
 .quiz-header { 
     display: flex; 
     justify-content: space-between; 
@@ -79,7 +77,6 @@ button.primary {
     color: #444; 
 }
 
-/* 選項圖片與佈局 */
 .options-grid { 
     display: grid; 
     grid-template-columns: 1fr 1fr; 
@@ -103,7 +100,6 @@ button.primary {
     border-radius: 10px; 
 }
 
-/* 選項底部單獨重聽控制區 */
 .option-footer { 
     display: flex; 
     align-items: center; 
@@ -122,9 +118,16 @@ button.primary {
     background: var(--green); 
     color: white; 
     border: none; 
-    width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
+    width: 40px; 
+    height: 40px; 
+    border-radius: 50%; 
+    cursor: pointer; 
+    font-size: 1.2rem; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+}
 
-/* 不知道按鈕固定在螢幕右下角 */
 .unknown-btn { 
     position: fixed; 
     right: 30px; 
