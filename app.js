@@ -52,7 +52,6 @@ const questions = [
   ["s12", "安全", "39. 在游泳池邊玩水時，我會…？", "慢慢走", "奔跑", "a", 77, 78],
   ["s13", "安全", "40. 如果發現家裡失火冒煙了，我會…？", "站著走動", "摀住口鼻低姿勢逃生", "b", 80, 79],
   ["s14", "安全", "41. 看到顏色漂亮的小藥丸時，我會…？", "給大人", "拿來吃吃看", "a", 81, 82],
-  // 🎯 這裡已經把第 42 題的陣列結構完全修復補齊
   ["s15", "安全", "42. 如果我不小心受傷流血了，我會…", "自己躲起來哭", "找大人幫忙", "b", 84, 83]
 ];
 
@@ -155,13 +154,15 @@ function handle(choice) {
             state.index++; 
             render();
         } else {
-            state.endTime = getCurrentTimeFormatted();
-            submit();
+            submit(); // 🛠️ 點完最後一題直接進入 submit，由 submit 函式頂端抓取最即時的結束時間
         }
     }
 }
 
+// 🛠️ 核心修正：將結束時間的擷取直接強制綁定在 submit() 最上游，避免非同步造成的漏記
 function submit() {
+    state.endTime = getCurrentTimeFormatted(); // 🎯 只要進入送出階段，立刻定格並寫入當下時間戳記
+
     document.getElementById("quizView").classList.add("hidden");
     document.getElementById("doneView").classList.remove("hidden");
     speakText("完成囉，謝謝你的幫忙");
@@ -198,7 +199,7 @@ function submit() {
         mode: "no-cors", 
         body: fd 
     }).then(function() {
-        console.log("資料發送完畢");
+        console.log("資料與時間戳記已成功異步發送");
     });
 }
 
