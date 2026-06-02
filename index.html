@@ -4,52 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>幼兒健康識能測驗</title>
-    <style>
-        :root { --green: #2c7a5b; --bg: #e9f5f0; --line: #d8e1e8; --coral: #f8d7cf; }
-        body { margin: 0; background: var(--bg); font-family: "Microsoft JhengHei", sans-serif; display: flex; justify-content: center; }
-        .hidden { display: none !important; }
-        .quiz-view { background: white; border-radius: 20px; padding: 30px; margin-top: 20px; width: 90%; max-width: 800px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; position: relative; min-height: 80vh; }
-        
-        /* 輸入框與下拉選單樣式 */
-        input, select { width: 80%; padding: 15px; font-size: 1.4rem; margin: 10px 0 20px 0; border: 2px solid var(--line); border-radius: 12px; text-align: center; text-align-last: center; background: white; }
-        button.primary { background: var(--green); color: white; border: 0; padding: 18px; font-size: 1.5rem; border-radius: 12px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; }
-        
-        /* 標題列控制項 */
-        .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .header-btns { display: flex; gap: 10px; }
-        .control-btn { background: white; border: 1px solid var(--line); padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 1rem; color: #444; }
-
-        /* 選項圖片與佈局 */
-        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .picture-option { border: 3px solid var(--line); border-radius: 15px; padding: 10px; cursor: pointer; transition: transform 0.2s; position: relative; }
-        .image-frame img { width: 100%; height: auto; max-height: 35vh; object-fit: contain; border-radius: 10px; }
-        
-        /* 選項底部單獨重聽控制區 */
-        .option-footer { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
-        .option-label { font-size: 1.4rem; font-weight: bold; margin: 0; }
-        .btn-audio-small { background: var(--green); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
-
-        /* 不知道按鈕固定在螢幕右下角 */
-        .unknown-btn { 
-            position: fixed; 
-            right: 30px; 
-            bottom: 30px; 
-            background: var(--coral); 
-            border: 2px solid #edb7ad; 
-            padding: 15px 40px; 
-            border-radius: 50px; 
-            font-weight: bold; 
-            font-size: 1.3rem;
-            cursor: pointer; 
-            z-index: 1000; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-
-        @media (max-width: 600px) { 
-            .options-grid { grid-template-columns: 1fr; } 
-            .unknown-btn { padding: 12px 30px; font-size: 1.1rem; right: 15px; bottom: 15px; }
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <section id="welcomeView" class="quiz-view">
@@ -102,3 +57,7 @@
         <p style="color: #666;">謝謝你的參與，資料已成功送出。</p>
         <button class="primary" onclick="location.reload()" style="max-width: 300px; margin-top: 30px;">返回首頁</button>
     </section>
+
+    <script src="app.js"></script>
+</body>
+</html>
