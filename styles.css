@@ -30,15 +30,17 @@ body {
     min-height: 80vh; 
 }
 
-/* 輸入框與標題 */
-input { 
+/* 輸入框與下拉選單樣式 */
+input, select { 
     width: 80%; 
     padding: 15px; 
     font-size: 1.4rem; 
-    margin: 20px 0; 
+    margin: 10px 0 20px 0; 
     border: 2px solid var(--line); 
     border-radius: 12px; 
     text-align: center; 
+    text-align-last: center; 
+    background: white; 
 }
 
 button.primary { 
@@ -51,6 +53,7 @@ button.primary {
     cursor: pointer; 
     width: 100%; 
     font-weight: bold; 
+    margin-top: 10px; 
 }
 
 /* 標題列控制項 */
@@ -129,21 +132,21 @@ button.primary {
     justify-content: center; 
 }
 
-/* 🔴 不知道按鈕：嚴格固定在螢幕右下角 */
+/* 不知道按鈕固定在螢幕右下角 */
 .unknown-btn { 
     position: fixed; 
     right: 30px; 
-            bottom: 30px; 
-            background: var(--coral); 
-            border: 2px solid #edb7ad; 
-            padding: 15px 40px; 
-            border-radius: 50px; 
-            font-weight: bold; 
-            font-size: 1.3rem;
-            cursor: pointer; 
-            z-index: 1000; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
+    bottom: 30px; 
+    background: var(--coral); 
+    border: 2px solid #edb7ad; 
+    padding: 15px 40px; 
+    border-radius: 50px; 
+    font-weight: bold; 
+    font-size: 1.3rem; 
+    cursor: pointer; 
+    z-index: 1000; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
+}
 
 @media (max-width: 600px) { 
     .options-grid { grid-template-columns: 1fr; } 
