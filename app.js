@@ -2,10 +2,11 @@ const FORM_ID = "1FAIpQLScXP8f1JzFq-kFYnZiLsGDUXQSQDUcE0OieeOMg4Lr6YvZzgA";
 const ENTRY_NAME = "entry.111555726";
 const ENTRY_DATA = "entry.2065308468";
 
+// 練習題資料庫 [ID, 類別, 題目, 選項A文字, 選項B文字, 正確選項, 圖片A, 圖片B]
 const practiceQuestions = [
-  ["p1", "練習", "練習1. 玩玩具玩到一半，突然好想上廁所的時候，我會...？", "先放下玩具，跑去上廁所", "繼續玩，憋著不去上廁所", "a", "p1a.png", "p1b.png"],
-  ["p2", "練習", "練習2. 剛從外面玩回來，口很渴的時候，我會...？", "先洗手，再喝水", "杯子拿起來就直接灌水", "a", "p2a.png", "p2b.png"],
-  ["p3", "練習", "練習3. 在幼兒園上課時，如果覺得肚子痛痛的時候，我會...？", "舉手告訴老師", "忍耐不說，繼續坐在位子上", "a", "p3a.png", "p3b.png"]
+  ["p1", "練習", "練習1. 玩玩具玩到一半，突然好想上廁所的時候，我會...？", "先放下玩具，跑去上廁所", "繼續玩，憋著不去上廁所", "a", 85, 86],
+  ["p2", "練習", "練習2. 剛從外面玩回來，口很渴的時候，我會...？", "先洗手，再喝水", "杯子拿起來就直接灌水", "a", 87, 88],
+  ["p3", "練習", "練習3. 在幼兒園上課時，如果覺得肚子痛痛的時候，我會...？", "舉手告訴老師", "忍耐不說，繼續坐在位子上", "a", 89, 90]
 ];
 
 // 正式題目庫（共 42 題）
@@ -18,7 +19,7 @@ const questions = [
   ["h6", "衛生", "6. 我會讓我的指甲保持…?", "乾淨短指甲", "髒髒長指甲", "a", 11, 12],
   ["e1", "運動", "7. 我想讓身體更健康，我會⋯？", "看電視", "玩跳繩", "b", 14, 13],
   ["e2", "運動", "8. 我想讓身體更有力氣，我會⋯？", "拍球", "看書", "a", 15, 16],
- ["e3", "運動", "9. 我想讓身體更健康，我會⋯？", "游泳", "玩電腦", "a", 17, 18],
+  ["e3", "運動", "9. 我想讓身體更健康，我會⋯？", "游泳", "玩電腦", "a", 17, 18],
   ["e4", "運動", "10. 我想讓身體更強壯，我會⋯？", "跑步", "滑平板", "a", 19, 20],
   ["e5", "運動", "11. 我想讓身體更有力量，我會⋯？", "玩攀爬架", "玩電動", "a", 21, 22],
   ["e6", "運動", "12. 我想讓身體更有力氣，我會⋯？", "騎腳踏車", "玩樂高", "a", 23, 24],
@@ -48,38 +49,37 @@ const questions = [
   ["s9", "安全", "36. 騎腳踏車運動時，我會選擇在…？", "騎在腳踏車道", "騎在馬路中間", "a", 71, 72],
   ["s10", "安全", "37. 搭機車出門的時候，我會…？", "不戴安全帽", "戴安全帽", "b", 74, 73],
   ["s11", "安全", "38. 如果看到地上有打火機，我會…？", "玩打火機", "把打火機交給大人", "b", 75, 76],
-  ["s12", "安全", "39. 在游泳池邊玩水時，我會…？", "慢慢走", "奔跑", "a", 77, 78],
+  ["s12", "安全", "39. 在游泳池邊玩水時 abuse，我會…？", "慢慢走", "奔跑", "a", 77, 78],
   ["s13", "安全", "40. 如果發現家裡失火冒煙了，我會…？", "站著走動", "摀住口鼻低姿勢逃生", "b", 80, 79],
   ["s14", "安全", "41. 看到顏色漂亮的小藥丸時，我會…？", "給大人", "拿來吃吃看", "a", 81, 82],
   ["s15", "安全", "42. 如果我不小心受傷流血了，我會…", "自己躲起來哭", "找大人幫忙", "b", 84, 83]
 ];
 
-let state = {
-    isPractice: true,
-    pIndex: 0,
-    index: 0,
-    answers: [],
-    user: "",
-    classLevel: ""
-};
+// ⭐ 新增：startTime 與 endTime 變數來記錄時間戳記
+let state = { isPractice: true, pIndex: 0, index: 0, answers: [], user: "", classLevel: "", startTime: "", endTime: "" };
+
+// 輔助函式：將目前的系統時間格式化為 "HH:MM:SS" (時:分:秒)
+function getCurrentTimeFormatted() {
+    const now = new Date();
+    const hrs = String(now.getHours()).padStart(2, '0');
+    const mins = String(now.getMinutes()).padStart(2, '0');
+    const secs = String(now.getSeconds()).padStart(2, '0');
+    return `${hrs}:${mins}:${secs}`;
+}
 
 function speakText(text, callback) {
     const u = new SpeechSynthesisUtterance(text);
     u.lang = "zh-TW";
-    u.rate = 0.85;
+    u.rate = 0.85; 
     if (callback) u.onend = callback;
     window.speechSynthesis.speak(u);
 }
 
 function playGuidance() {
     window.speechSynthesis.cancel();
-
     const q = state.isPractice ? practiceQuestions[state.pIndex] : questions[state.index];
-    const questionTextText = q[2]
-        .replace(/^\d+\.\s*/, "")
-        .replace(/^練習\d+\.\s*/, "")
-        .replace(/[…？?。]/g, "");
-
+    const questionTextText = q[2].replace(/^\d+\.\s*/, "").replace(/^練習\d+\.\s*/, "").replace(/[…？?。]/g, "");
+    
     speakText(questionTextText, () => {
         setTimeout(() => {
             speakText(q[3], () => {
@@ -93,41 +93,37 @@ function playGuidance() {
 
 function render() {
     const q = state.isPractice ? practiceQuestions[state.pIndex] : questions[state.index];
-
+    
+    const headerSpan = document.getElementById("currentNum").parentNode;
     if (state.isPractice) {
-        document.getElementById("currentNum").innerText = `${state.pIndex + 1}/${practiceQuestions.length}`;
+        headerSpan.innerHTML = `<span id="currentNum">練習 ${state.pIndex + 1} / ${practiceQuestions.length}</span>`;
     } else {
-        document.getElementById("currentNum").innerText = `${state.index + 1}/${questions.length}`;
+        headerSpan.innerHTML = `<span id="currentNum">第 ${state.index + 1} / ${questions.length} 題</span>`;
     }
-
+    
     document.getElementById("questionPrompt").innerText = q[2];
-
-    document.getElementById("imageA").src = state.isPractice
-        ? "assets/" + q[6]
-        : "assets/image" + q[6] + ".png";
-
-    document.getElementById("imageB").src = state.isPractice
-        ? "assets/" + q[7]
-        : "assets/image" + q[7] + ".png";
-
+    
+    document.getElementById("imageA").src = "assets/image" + q[6] + ".png";
+    document.getElementById("imageB").src = "assets/image" + q[7] + ".png";
+    
     document.getElementById("labelA").innerText = q[3];
     document.getElementById("labelB").innerText = q[4];
-
+    
     if (state.isPractice && state.pIndex === 0) {
         document.getElementById("prevButton").style.display = "none";
     } else {
         document.getElementById("prevButton").style.display = "inline-block";
     }
-
+    
     setTimeout(playGuidance, 500);
 }
 
 function handle(choice) {
     window.speechSynthesis.cancel();
-
+    
     if (state.isPractice) {
         if (state.pIndex < practiceQuestions.length - 1) {
-            state.pIndex++;
+            state.pIndex++; 
             render();
         } else {
             state.isPractice = false;
@@ -138,20 +134,21 @@ function handle(choice) {
     } else {
         const q = questions[state.index];
         let recordValue;
-
         if (choice === "不知道") {
-            recordValue = 3;
+            recordValue = 3; 
         } else {
-            const correctText = q[5] === "a" ? q[3] : q[4];
-            recordValue = choice === correctText ? 1 : 0;
+            const correctText = (q[5] === 'a') ? q[3] : q[4];
+            recordValue = (choice === correctText) ? 1 : 0;
         }
-
+        
         state.answers.push(recordValue);
-
+        
         if (state.index < questions.length - 1) {
-            state.index++;
+            state.index++; 
             render();
         } else {
+            // ⭐ 點完最後一題時，立刻在背景記錄結束時間
+            state.endTime = getCurrentTimeFormatted();
             submit();
         }
     }
@@ -161,102 +158,89 @@ async function submit() {
     document.getElementById("quizView").classList.add("hidden");
     document.getElementById("doneView").classList.remove("hidden");
     speakText("完成囉，謝謝你的幫忙");
-
-    let scores = { h: 0, e: 0, n: 0, v: 0, s: 0, total: 0 };
-
+    
+    let scores = { h:0, e:0, n:0, v:0, s:0, total:0 };
     const details = state.answers.map((val, i) => {
         const cat = questions[i][0][0];
-        if (val === 1) {
-            scores.total++;
-            scores[cat]++;
-        }
+        if (val === 1) { scores.total++; scores[cat]++; }
         return val;
     });
-
+    
+    // ⭐【時間打包邏輯】將「開始時間」與「結束時間」串接在數據字串的最尾端
+    // 輸出格式： 42題答案, 各維度得分, 總分, 開始時間, 結束時間
     const summary = [
-        ...details,
-        scores.h,
-        scores.e,
-        scores.n,
-        scores.v,
-        scores.s,
-        scores.total
+        ...details, 
+        scores.h, scores.e, scores.n, scores.v, scores.s, scores.total,
+        state.startTime, 
+        state.endTime
     ].join(",");
-
+    
     let currentClass = state.classLevel || document.getElementById("classLevelSelect").value || "";
-    let classCode = "0";
-
+    let classCode = "0"; 
     if (currentClass === "小班") classCode = "1";
     else if (currentClass === "中班") classCode = "2";
     else if (currentClass === "大班") classCode = "3";
-
+    
     let finalUser = state.user || document.getElementById("userNameInput").value.trim() || "未知編碼";
     const finalIdentity = `${finalUser}_${classCode}`;
-
+    
     const fd = new FormData();
     fd.append(ENTRY_NAME, finalIdentity);
     fd.append(ENTRY_DATA, summary);
-
-    await fetch(`https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`, {
-        method: "POST",
-        mode: "no-cors",
-        body: fd
-    });
+    await fetch(`https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`, { method:"POST", mode:"no-cors", body:fd });
 }
 
 window.onload = () => {
     document.getElementById("startButton").onclick = () => {
         const lv = document.getElementById("classLevelSelect").value;
         const val = document.getElementById("userNameInput").value.trim();
-
+        
         if (!lv) return alert("請選擇幼兒的級別（大班/中班/小班）");
         if (!val) return alert("請輸入受試者編碼");
-
+        
         state.classLevel = lv;
         state.user = val;
         state.isPractice = true;
         state.pIndex = 0;
         state.index = 0;
         state.answers = [];
-
+        
+        // ⭐ 點擊開始按鈕的瞬間，立刻在背景記錄開始時間
+        state.startTime = getCurrentTimeFormatted();
+        
         document.getElementById("welcomeView").classList.add("hidden");
         document.getElementById("quizView").classList.remove("hidden");
         render();
     };
-
+    
     document.getElementById("optionA").onclick = (e) => {
-        if (e.target.id === "btnAudioA") return;
+        if(e.target.id === "btnAudioA") return;
         handle(document.getElementById("labelA").innerText);
     };
-
     document.getElementById("optionB").onclick = (e) => {
-        if (e.target.id === "btnAudioB") return;
+        if(e.target.id === "btnAudioB") return;
         handle(document.getElementById("labelB").innerText);
     };
-
+    
     document.getElementById("btnAudioA").onclick = (e) => {
         e.stopPropagation();
         window.speechSynthesis.cancel();
         speakText(document.getElementById("labelA").innerText);
     };
-
     document.getElementById("btnAudioB").onclick = (e) => {
         e.stopPropagation();
         window.speechSynthesis.cancel();
         speakText(document.getElementById("labelB").innerText);
     };
-
+    
     document.getElementById("prevButton").onclick = () => {
         if (state.isPractice) {
-            if (state.pIndex > 0) {
-                state.pIndex--;
-                render();
-            }
+            if (state.pIndex > 0) { state.pIndex--; render(); }
         } else {
             if (state.index > 0) {
-                state.index--;
-                state.answers.pop();
-                render();
+                state.index--; 
+                state.answers.pop(); 
+                render(); 
             } else {
                 state.isPractice = true;
                 state.pIndex = practiceQuestions.length - 1;
@@ -264,7 +248,6 @@ window.onload = () => {
             }
         }
     };
-
     document.getElementById("replayButton").onclick = () => playGuidance();
     document.getElementById("unknownButton").onclick = () => handle("不知道");
 };
