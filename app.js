@@ -52,6 +52,7 @@ const questions = [
   ["s12", "安全", "39. 在游泳池邊玩水時，我會…？", "慢慢走", "奔跑", "a", 77, 78],
   ["s13", "安全", "40. 如果發現家裡失火冒煙了，我會…？", "站著走動", "摀住口鼻低姿勢逃生", "b", 80, 79],
   ["s14", "安全", "41. 看到顏色漂亮的小藥丸時，我會…？", "給大人", "拿來吃吃看", "a", 81, 82],
+  // 🎯 這裡已經把第 42 題的陣列結構完全修復補齊
   ["s15", "安全", "42. 如果我不小心受傷流血了，我會…", "自己躲起來哭", "找大人幫忙", "b", 84, 83]
 ];
 
@@ -94,7 +95,6 @@ function playGuidance() {
 function render() {
     const q = state.isPractice ? practiceQuestions[state.pIndex] : questions[state.index];
     
-    // 🛠️ 修正排版，精確獲取父層，確保下一題、上一題按鈕不會因為 innerHTML 重寫而被洗掉
     const numSpan = document.getElementById("currentNum");
     if (numSpan) {
         if (state.isPractice) {
@@ -173,6 +173,96 @@ function submit() {
         return val;
     });
     
-    const summary =ick = () => playGuidance();
-    document.getElementById("unknownButton").onclick = () => handle("unknown");
+    const summary = [
+        ...details, 
+        scores.h, scores.e, scores.n, scores.v, scores.s, scores.total,
+        state.startTime, 
+        state.endTime
+    ].join(",");
+    
+    let currentClass = state.classLevel || document.getElementById("classLevelSelect").value || "";
+    let classCode = "0"; 
+    if (currentClass === "小班") classCode = "1";
+    else if (currentClass === "中班") classCode = "2";
+    else if (currentClass === "大班") classCode = "3";
+    
+    let finalUser = state.user || document.getElementById("userNameInput").value.trim() || "未知編碼";
+    const finalIdentity = finalUser + "_" + classCode;
+    
+    const fd = new FormData();
+    fd.append(ENTRY_NAME, finalIdentity);
+    fd.append(ENTRY_DATA, summary);
+    
+    fetch("https://docs.google.com/forms/d/e/" + FORM_ID + "/formResponse", { 
+        method: "POST", 
+        mode: "no-cors", 
+        body: fd 
+    }).then(function() {
+        console.log("資料發送完畢");
+    });
+}
+
+window.onload = function() {
+    document.getElementById("startButton").onclick = function() {
+        const lv = document.getElementById("classLevelSelect").value;
+        const val = document.getElementById("userNameInput").value.trim();
+        
+        if (!lv) return alert("請選擇幼兒的級別（大班/中班/小班）");
+        if (!val) return alert("請輸入受試者編碼");
+        
+        state.classLevel = lv;
+        state.user = val;
+        state.isPractice = true;
+        state.pIndex = 0;
+        state.index = 0;
+        state.answers = [];
+        state.startTime = getCurrentTimeFormatted();
+        
+        document.getElementById("welcomeView").classList.add("hidden");
+        document.getElementById("quizView").classList.remove("hidden");
+        render();
+    };
+    
+    document.getElementById("optionA").onclick = function(e) {
+        if(e.target.id === "btnAudioA") return;
+        handle(document.getElementById("labelA").innerText);
+    };
+    document.getElementById("optionB").onclick = function(e) {
+        if(e.target.id === "btnAudioB") return;
+        handle(document.getElementById("labelB").innerText);
+    };
+    
+    document.getElementById("btnAudioA").onclick = function(e) {
+        e.stopPropagation();
+        window.speechSynthesis.cancel();
+        speakText(document.getElementById("labelA").innerText);
+    };
+    document.getElementById("btnAudioB").onclick = function(e) {
+        e.stopPropagation();
+        window.speechSynthesis.cancel();
+        speakText(document.getElementById("labelB").innerText);
+    };
+    
+    document.getElementById("prevButton").onclick = function() {
+        if (state.isPractice) {
+            if (state.pIndex > 0) { state.pIndex--; render(); }
+        } else {
+            if (state.index > 0) {
+                state.index--; 
+                state.answers.pop(); 
+                render(); 
+            } else {
+                state.isPractice = true;
+                state.pIndex = practiceQuestions.length - 1;
+                render();
+            }
+        }
+    };
+
+    document.getElementById("nextButton").onclick = function() {
+        handle("unknown");
+    };
+
+    document.getElementById("replayButton").onclick = function() { playGuidance(); };
+    document.getElementById("unknownButton").onclick = function() { handle("unknown"); };
 };
