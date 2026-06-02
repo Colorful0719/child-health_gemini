@@ -12,7 +12,7 @@ const practiceQuestions = [
 // 正式題目庫（共 42 題）
 const questions = [
   ["h1", "衛生", "1. 吃完飯後，我會...?", "玩玩具", "刷牙", "b", 2, 1],
-  ["h2", "衛生", "2. 睡覺前，我會...?", "洗澡", "髒髒的去睡覺", "a", 3, 4],
+  ["h2", "衛生", "2. 睡覺前，我會...?", "洗澡", "髒髒的去睡劇", "a", 3, 4],
   ["h3", "衛生", "3. 上廁所後，我會…?", "跑去玩", "洗手", "b", 6, 5],
   ["h4", "衛生", "4. 打噴嚏的時候，我會…?", "遮口鼻", "直接打噴嚏", "a", 7, 8],
   ["h5", "衛生", "5. 吃飯的時候，我會用….?", "髒髒餐具組", "乾淨餐具組", "b", 10, 9],
@@ -38,7 +38,7 @@ const questions = [
   ["v4", "視力", "25. 看電視的時候，我要坐在⋯？", "在電視機正前面", "在沙發上", "b", 50, 49],
   ["v5", "視力", "26. 想照顧眼睛，我會吃⋯？", "彩色蔬菜", "彩色糖果", "a", 51, 52],
   ["v6", "視力", "27. 看手機時，我會在⋯？", "暗暗的地方", "亮亮的地方", "b", 54, 53],
-  ["s1", "安全", "28. 盪鞦韆時，漸我要⋯？", "坐著", "站著", "a", 55, 56],
+  ["s1", "安全", "28. 盪鞦韆時，我要⋯？", "坐著", "站著", "a", 55, 56],
   ["s2", "安全", "29. 玩球時，我會選擇在⋯？", "在馬路邊或巷口玩球", "在公園玩球", "b", 58, 57],
   ["s3", "安全", "30. 想玩玩具時，我會玩⋯？", "玩插座", "玩扮家家酒", "b", 59, 60],
   ["s4", "安全", "31. 在家裡想找事情做的時候，我會…？", "手指伸進電風扇", "看書", "b", 61, 62],
@@ -101,7 +101,7 @@ function render() {
     
     document.getElementById("questionPrompt").innerText = q[2];
     
-    // 🛠️ 核心修復：精確切分練習題與正式題的圖片網址路徑
+    // 精確切分練習題（assets/85.png）與正式題（assets/image1.png）的路徑讀取
     if (state.isPractice) {
         document.getElementById("imageA").src = "assets/" + q[6] + ".png";
         document.getElementById("imageB").src = "assets/" + q[7] + ".png";
@@ -138,7 +138,7 @@ function handle(choice) {
     } else {
         const q = questions[state.index];
         let recordValue;
-        if (choice === "不知道") {
+        if (choice === "unknown" || choice === "不知道") {
             recordValue = 3; 
         } else {
             const correctText = (q[5] === 'a') ? q[3] : q[4];
@@ -249,7 +249,12 @@ window.onload = () => {
     };
 
     document.getElementById("nextButton").onclick = () => {
-        handle("不知道");
+        handle("unknown");
+    };
+
+    document.getElementById("replayButton").onclick = () => playGuidance();
+    document.getElementById("unknownButton").onclick = () => handle("unknown");
+};
     };
 
     document.getElementById("replayButton").onclick = () => playGuidance();
