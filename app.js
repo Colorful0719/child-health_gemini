@@ -55,13 +55,23 @@ const questions = [
   ["s15", "安全", "42. 如果我不小心受傷流血了，我會…", "自己躲起來哭", "找大人幫忙", "b", 84, 83]
 ];
 
-let state = { isPractice: true, pIndex: 0, index: 0, answers: [], user: "", classLevel: "", startTime: "", endTime: "" };
+// 為了計算精確總秒數，state 裡面除了文字格式，我們額外增加記下原始 Date 物件的欄位
+let state = { 
+    isPractice: true, 
+    pIndex: 0, 
+    index: 0, 
+    answers: [], 
+    user: "", 
+    classLevel: "", 
+    startTimeStr: "", 
+    endTimeStr: "",
+    startRawObj: null 
+};
 
-function getCurrentTimeFormatted() {
-    const now = new Date();
-    const hrs = String(now.getHours()).padStart(2, '0');
-    const mins = String(now.getMinutes()).padStart(2, '0');
-    const secs = String(now.getSeconds()).padStart(2, '0');
+function getCurrentTimeFormatted(dateObj) {
+    const hrs = String(dateObj.getHours()).padStart(2, '0');
+    const mins = String(dateObj.getMinutes()).padStart(2, '0');
+    const secs = String(dateObj.getSeconds()).padStart(2, '0');
     return hrs + ":" + mins + ":" + secs;
 }
 
@@ -154,14 +164,22 @@ function handle(choice) {
             state.index++; 
             render();
         } else {
-            submit(); // 🛠️ 點完最後一題直接進入 submit，由 submit 函式頂端抓取最即時的結束時間
+            submit(); 
         }
     }
 }
 
-// 🛠️ 核心修正：將結束時間的擷取直接強制綁定在 submit() 最上游，避免非同步造成的漏記
 function submit() {
-    state.endTime = getCurrentTimeFormatted(); // 🎯 只要進入送出階段，立刻定格並寫入當下時間戳記
+    // 🎯 1. 抓取精確的結束時間物件與字串
+    const endRawObj = new Date();
+    state.endTimeStr = getCurrentTimeFormatted(endRawObj);
+
+    // 🎯 2. 自動計算總作答秒數（結束毫秒 - 開始毫秒 ➡️ 除以 1000 ➡️ 無條件捨去變整數）
+    let totalSeconds = 0;
+    if (state.startRawObj) {
+        const diffMs = endRawObj.getTime() - state.startRawObj.getTime();
+        totalSeconds = Math.floor(diffMs / 1000);
+    }
 
     document.getElementById("quizView").classList.add("hidden");
     document.getElementById("doneView").classList.remove("hidden");
@@ -174,11 +192,13 @@ function submit() {
         return val;
     });
     
+    // 🎯 3. 欄位串接：42題答案, 各大題得分, 總分, [測驗開始時分秒], [測驗結束時分秒], [總作答時間秒數]
     const summary = [
         ...details, 
         scores.h, scores.e, scores.n, scores.v, scores.s, scores.total,
-        state.startTime, 
-        state.endTime
+        state.startTimeStr, 
+        state.endTimeStr,
+        totalSeconds
     ].join(",");
     
     let currentClass = state.classLevel || document.getElementById("classLevelSelect").value || "";
@@ -199,7 +219,7 @@ function submit() {
         mode: "no-cors", 
         body: fd 
     }).then(function() {
-        console.log("資料與時間戳記已成功異步發送");
+        console.log("資料發送成功");
     });
 }
 
@@ -217,7 +237,10 @@ window.onload = function() {
         state.pIndex = 0;
         state.index = 0;
         state.answers = [];
-        state.startTime = getCurrentTimeFormatted();
+        
+        // 🎯 點擊開始測驗的瞬間，記錄開始時間物件與字串
+        state.startRawObj = new Date();
+        state.startTimeStr = getCurrentTimeFormatted(state.startRawObj);
         
         document.getElementById("welcomeView").classList.add("hidden");
         document.getElementById("quizView").classList.remove("hidden");
